@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>License Plate Recognition</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>License Plate Recognition</h1>
+        <form method="post" enctype="multipart/form-data"> 
+            <input type="file" name="file" accept="image/*" required>
+            <br>
+            <button type="submit">Upload and Recognize</button>
+        </form>
+        
+        {% if filename %}
+        <div class="result">
+            <h2>Uploaded Image</h2>
+            <img src="{{ url_for('uploaded_file', filename=filename) }}" alt="Uploaded Image">
+            <h2>License Plate: {{ license_plate }}</h2>
+        </div>
+        {% endif %}
+        
+        {% if immigration_result %}
+            {% if immigration_result.status == 'success' %}
+                <div class="success">
+                    <h2>Success! Valid pass has been detected</h2>
+                </div>
+                <div class="travellers-section">
+                    <h3>Travellers:</h3>
+                    <ol class = "travellers-list">
+                        {% for traveller in immigration_result.travellers %}
+                            <li>{{ traveller.first_name }} {{ traveller.last_name }}</li>
+                        {% endfor %}
+                    </ol>
+                </div>
+            {% else %}
+                <div class="failure">
+                    <h2>Failure</h2>
+                    <p>{{ immigration_result.message }}</p>
+                </div>
+            {% endif %}
+        {% endif %}
+
+    </div>
+</body>
+</html>
