@@ -5,6 +5,8 @@ import requests
 from werkzeug.utils import secure_filename
 from flask_sqlalchemy import SQLAlchemy
 from pprint import pprint
+from flask_cors import CORS # Include CORS Requests
+from datetime import datetime, timedelta
 
 # Import the database instance
 from db_instance import db
@@ -12,13 +14,14 @@ from db_instance import db
 # Immigration Checkpoint Workflow Logic
 from immigration_logic import immigration_walkthrough
 
-from models import User, UserSensitiveInformation, Vehicle, UserVehicle, Location, Preset, PresetTraveller, Pass, PassTraveller
+from models import UserSensitiveInformation, Vehicle, UserVehicle, Preset, PresetTraveller, Pass, PassTraveller, UserTraveller
 
 # Import mock_data function
 from mock_data import insert_mock_data
 
 # Initializing Flask App
 app = Flask(__name__)
+CORS(app)  # Enable CORS for React Native requests
 
 # Configuration
 UPLOAD_FOLDER = 'uploads' # Directory where uploaded images will be saved
@@ -182,68 +185,46 @@ def vehicular_guidance_system():
 def add_vehicle_to_user(user_id):
 
     # 1. Check if user exists
-    user = User.query.get(user_id)
+    user = UserSensitiveInformation.query.get(user_id)
     if not user:
         return jsonify({"error": "User not found"}), 404
     
     # 2. Parse JSON from request
     data = request.get_json(force=True)
     vehicle_number = data.get('vehicle_number')
-    user_vehicle_name = data.get('user_vehicle_name') # Name user has assigned to the vehicle
+    user_vehicle_model = data.get('user_vehicle_model') # Name user has assigned to the vehicle
     
     # If vehicle number or user vehicle name is not mentioned in incoming JSON, throw error
-    if not vehicle_number or not user_vehicle_name:
-        return jsonify({"error": "Missing vehicle_number or user_vehicle_name"}), 400
+    if not vehicle_number:
+        return jsonify({"error": "Missing vehicle_number"}), 400
     
     # 3. Check if the vehicle (by plate number) already exists
     vehicle = Vehicle.query.filter_by(vehicle_number=vehicle_number).first()
     if not vehicle:
+
         # Create a new vehicle record if none found
         vehicle = Vehicle(vehicle_number=vehicle_number)
         db.session.add(vehicle)
         db.session.commit()
-    
-    # 4. Check if there's already a UserVehicle link
-    existing_link = UserVehicle.query.filter_by(
+
+    # 5. Create a new UserVehicle link
+    user_vehicle = UserVehicle(
         user_id=user_id,
-        vehicle_id=vehicle.vehicle_id
-    ).first()
+        vehicle_id=vehicle.vehicle_id,
+    )
+
+    db.session.add(user_vehicle)
+    db.session.commit()
     
-    if existing_link:
-        # The user already has this vehicle in their profile;
-        # Update the user_vehicle_name if needed
-        existing_link.user_vehicle_name = user_vehicle_name
-        db.session.commit()
-        
-        return jsonify({
-            "message": "Vehicle name updated for user",
-            "user_vehicle": {
-                "user_id": user_id,
-                "vehicle_id": vehicle.vehicle_id,
-                "user_vehicle_name": existing_link.user_vehicle_name,
-                "vehicle_number": vehicle.vehicle_number
-            }
-        }), 200
-    
-    else:
-        # 5. Create a new UserVehicle link
-        user_vehicle = UserVehicle(
-            user_id=user_id,
-            vehicle_id=vehicle.vehicle_id,
-            user_vehicle_name=user_vehicle_name
-        )
-        db.session.add(user_vehicle)
-        db.session.commit()
-        
-        return jsonify({
-            "message": "Vehicle added to user successfully",
-            "user_vehicle": {
-                "user_id": user_id,
-                "vehicle_id": vehicle.vehicle_id,
-                "user_vehicle_name": user_vehicle_name,
-                "vehicle_number": vehicle.vehicle_number
-            }
-        }), 201
+    return jsonify({
+        "message": "Vehicle added to user successfully",
+        "user_vehicle": {
+            "user_id": user_id,
+            "vehicle_id": vehicle.vehicle_id,
+            "vehicle_number": vehicle.vehicle_number
+        }
+    }), 201
+
 
 # Function to recognize license plate using PlateRecognizer API
 def recognize_license_plate(image_path, token):
@@ -277,7 +258,7 @@ def recognize_license_plate(image_path, token):
 def get_user_vehicles(user_id):
 
     # 1. Make sure the user exists
-    user = User.query.get(user_id)
+    user = UserSensitiveInformation.query.get(user_id)
     if not user:
         return jsonify({"error": "User not found"}), 404
     
@@ -295,90 +276,41 @@ def get_user_vehicles(user_id):
     for uv, v in user_vehicles:
         vehicles_list.append({
             "user_vehicle_id": uv.user_vehicle_id,
-            "user_vehicle_name": uv.user_vehicle_name,
+            "user_vehicle_model": uv.user_vehicle_model,
             "vehicle_id": v.vehicle_id,
             "vehicle_number": v.vehicle_number
         })
     
     # 4. Return the JSON response
     return jsonify({
-        "user_id": user_id,
+        # "user_id": user_id,
         "vehicles": vehicles_list
     }), 200
 
 
-@app.route('/api/locations', methods=['GET'])
-def get_all_locations():
-
-    # Query all locations from the table
-    locations = Location.query.all()
-
-    # Convert the result into a list of dictionaries
-    locations_list = [
-        {
-            "location_id": loc.location_id,
-            "city": loc.city,
-            "state": loc.state,
-            "country": loc.country
-        }
-        for loc in locations
-    ]
-
-    return jsonify({"locations": locations_list}), 200
-
-
-@app.route('/api/locations', methods=['POST'])
-def add_location():
-
-    # Parse the request body
-    data = request.get_json(force=True)
-
-    city = data.get("city")
-    state = data.get("state")
-    country = data.get("country")
-
-    # Basic validation for input body request
-    if not city or not state or not country:
-        return jsonify({"error": "Missing city, state, or country"}), 400
-
-    # Check if the location already exists to prevent duplicates
-    existing_location = Location.query.filter_by(city=city, state=state, country=country).first()
-
-    if existing_location:
-        return jsonify({
-            "message": "Location already exists",
-            "location_id": existing_location.location_id
-        }), 200
-
-    # Create and insert new location
-    new_location = Location(city=city, state=state, country=country)
-    db.session.add(new_location)
-    db.session.commit()
-
-    return jsonify({
-        "message": "Location added successfully",
-        "location": {
-            "location_id": new_location.location_id,
-            "city": new_location.city,
-            "state": new_location.state,
-            "country": new_location.country
-        }
-    }), 201
-
-
+# Get all the preset names and passenger count for a user id (used on homepage)
 @app.route('/api/users/<int:user_id>/presets_name', methods=['GET'])
 def get_user_presets(user_id):
     
     # Check if user exists
-    user = User.query.get(user_id)
+    user = UserSensitiveInformation.query.get(user_id)
     if not user:
         return jsonify({"error": "User not found"}), 404
     
     # Fetch presets for the given user_id
     presets = Preset.query.filter_by(user_id=user_id).all()
 
-    # Convert to JSON format
-    presets_list = [{"preset_id": p.preset_id, "preset_name": p.preset_name} for p in presets]
+    # Convert to JSON format with passenger count
+    presets_list = []
+    for p in presets:
+        # Count number of passengers in the preset
+        passenger_count = db.session.query(PresetTraveller).filter_by(preset_id=p.preset_id).count()
+        
+        presets_list.append({
+            "preset_id": p.preset_id,
+            "preset_name": p.preset_name,
+            "passenger_count": passenger_count  # Add passenger count
+        })
 
     # Return response
     return jsonify({
@@ -387,6 +319,7 @@ def get_user_presets(user_id):
     }), 200
 
 
+# Get all the users for a given preset id - not needed now
 @app.route('/api/presets/<int:preset_id>/users', methods=['GET'])
 def get_preset_users(preset_id):
 
@@ -398,19 +331,19 @@ def get_preset_users(preset_id):
     # Join User, PresetTraveller, and UserSensitiveInformation
     users = (
         db.session.query(
-            User.user_id, 
+            UserSensitiveInformation.user_id, 
             UserSensitiveInformation.first_name, 
+            UserSensitiveInformation.middle_name,
             UserSensitiveInformation.last_name
         )
-        .join(PresetTraveller, User.user_id == PresetTraveller.user_id)  # Join PresetTraveller to link presets and users
-        .join(UserSensitiveInformation, User.user_id == UserSensitiveInformation.user_id)  # Join UserSensitiveInformation to fetch names
+        .join(PresetTraveller, UserSensitiveInformation.user_id == PresetTraveller.user_id)  # Join PresetTraveller to link presets and users
         .filter(PresetTraveller.preset_id == preset_id)
         .all()
     )
 
     # Convert to JSON-friendly format
     users_list = [
-        {"user_id": u.user_id, "first_name": u.first_name, "last_name": u.last_name}
+        {"user_id": u.user_id, "first_name": u.first_name, "middle_name": u.middle_name, "last_name": u.last_name}
         for u in users
     ]
 
@@ -421,13 +354,12 @@ def get_preset_users(preset_id):
         "users": users_list
     }), 200
 
+# Get preset id, name and users list 
 @app.route('/api/users/<int:user_id>/created-presets-with-users', methods=['GET'])
 def get_user_created_presets_with_users(user_id):
-    from models import Preset, PresetTraveller, User, UserSensitiveInformation
-    from db_instance import db
     
     # Check if the user exists
-    user = User.query.get(user_id)
+    user = UserSensitiveInformation.query.get(user_id)
     if not user:
         return jsonify({"error": "User not found"}), 404
 
@@ -447,14 +379,13 @@ def get_user_created_presets_with_users(user_id):
         # Fetch all users associated with the preset
         preset_users = (
             db.session.query(
-                User.user_id,
+                UserSensitiveInformation.user_id,
                 UserSensitiveInformation.first_name,
                 UserSensitiveInformation.middle_name,
                 UserSensitiveInformation.last_name,
                 UserSensitiveInformation.passport_number
             )
-            .join(PresetTraveller, User.user_id == PresetTraveller.user_id)
-            .join(UserSensitiveInformation, User.user_id == UserSensitiveInformation.user_id)
+            .join(PresetTraveller, UserSensitiveInformation.user_id == PresetTraveller.user_id)
             .filter(PresetTraveller.preset_id == preset_id)
             .all()
         )
@@ -482,6 +413,7 @@ def get_user_created_presets_with_users(user_id):
         "presets_created": presets_data
     }), 200
 
+# Create presets
 @app.route('/api/presets/create', methods=['POST'])
 def create_preset():
 
@@ -499,7 +431,7 @@ def create_preset():
         return jsonify({"error": "User ID is required"}), 400
 
     # Check if the user creating the preset exists
-    creator = User.query.get(user_id)
+    creator = UserSensitiveInformation.query.get(user_id)
     if not creator:
         return jsonify({"error": f"User ID {user_id} not found"}), 404
 
@@ -555,7 +487,8 @@ def create_preset():
 def get_user_passes(user_id):
 
     # Check if the user exists
-    user = User.query.get(user_id)
+    user = UserSensitiveInformation.query.get(user_id)
+
     if not user:
         return jsonify({"error": "User not found"}), 404
 
@@ -563,12 +496,9 @@ def get_user_passes(user_id):
     passes = (
         db.session.query(
             Pass.pass_id,
-            Pass.vehicle_id,
-            Pass.creation_datetime,
-            Pass.expiry_datetime,
+            # Pass.vehicle_id,
             Pass.pass_date,
-            Pass.origin_id,
-            Pass.destination_id,
+            Pass.expiry_datetime,
             Pass.pass_utilized
         )
         .filter(Pass.creator_user_id == user_id)
@@ -580,14 +510,14 @@ def get_user_passes(user_id):
         # Fetch all travellers for the given pass
         travellers = (
             db.session.query(
-                User.user_id,
+                UserSensitiveInformation.user_id,
                 UserSensitiveInformation.first_name,
                 UserSensitiveInformation.middle_name,
                 UserSensitiveInformation.last_name,
                 UserSensitiveInformation.passport_number
             )
-            .join(PassTraveller, User.user_id == PassTraveller.user_id)
-            .join(UserSensitiveInformation, User.user_id == UserSensitiveInformation.user_id)
+            .join(PassTraveller, UserSensitiveInformation.user_id == PassTraveller.user_id)
+            #.join(UserSensitiveInformation, UserSensitiveInformation.user_id == UserSensitiveInformation.user_id)
             .filter(PassTraveller.pass_id == p.pass_id)
             .all()
         )
@@ -606,12 +536,12 @@ def get_user_passes(user_id):
 
         passes_list.append({
             "pass_id": p.pass_id,
-            "vehicle_id": p.vehicle_id,
-            "creation_datetime": p.creation_datetime.strftime("%Y-%m-%d %H:%M:%S"),
+            # "vehicle_id": p.vehicle_id,
+            # "creation_datetime": p.creation_datetime.strftime("%Y-%m-%d %H:%M:%S"),
             "expiry_datetime": p.expiry_datetime.strftime("%Y-%m-%d %H:%M:%S"),
-            "pass_date": p.pass_date.strftime("%Y-%m-%d"),
-            "origin_id": p.origin_id,
-            "destination_id": p.destination_id,
+            "pass_date": p.pass_date.strftime("%Y-%m-%d %H:%M:%S"),
+            # "origin_id": p.origin_id,
+            # "destination_id": p.destination_id,
             "pass_utilized": p.pass_utilized,
             "travellers": travellers_list
         })
@@ -623,31 +553,27 @@ def get_user_passes(user_id):
 
 @app.route('/api/passes/create', methods=['POST'])
 def create_pass():
-    from models import Pass, PassTraveller, Vehicle, UserSensitiveInformation
-    from db_instance import db
-    from flask import request, jsonify
-    from datetime import datetime
 
     # Extract data from request body
     data = request.get_json()
 
     vehicle_number = data.get("vehicle_number")
     creator_user_id = data.get("creator_user_id")
-    creation_datetime = data.get("creation_datetime")
-    expiry_datetime = data.get("expiry_datetime")
     pass_date = data.get("pass_date")
     pass_utilized = data.get("pass_utilized", False)
     traveller_passport_numbers = data.get("traveller_passport_numbers", [])
 
     # Validate required fields
-    if not all([vehicle_number, creator_user_id, creation_datetime, expiry_datetime, pass_date]):
-        return jsonify({"error": "Missing required fields"}), 400
+    if not all([vehicle_number, creator_user_id, pass_date]):
+        return jsonify({"error": "Missing required fields - Vehicle number, Pass user id and pass date"}), 400
 
     # Convert datetime strings to proper formats
     try:
-        creation_datetime = datetime.strptime(creation_datetime, "%Y-%m-%d %H:%M:%S")
-        expiry_datetime = datetime.strptime(expiry_datetime, "%Y-%m-%d %H:%M:%S")
-        pass_date = datetime.strptime(pass_date, "%Y-%m-%d").date()
+        # creation_datetime = datetime.strptime(creation_datetime, "%Y-%m-%d %H:%M:%S")
+        # expiry_datetime = datetime.strptime(expiry_datetime, "%Y-%m-%d %H:%M:%S")
+        pass_date = datetime.strptime(pass_date, "%Y-%m-%d %H:%M:%S").date()
+        expiry_datetime = pass_date + timedelta(hours=24) # Add 24 hours
+    
     except ValueError:
         return jsonify({"error": "Invalid date format"}), 400
 
@@ -656,18 +582,16 @@ def create_pass():
     if not vehicle:
         return jsonify({"error": f"Vehicle with number {vehicle_number} not found"}), 404
 
-    vehicle_id = vehicle.vehicle_id
-
     # Create new pass
     new_pass = Pass(
-        vehicle_id=vehicle_id,
+        # vehicle_id=vehicle_id,
         creator_user_id=creator_user_id,
-        creation_datetime=creation_datetime,
+        # creation_datetime=creation_datetime,
         expiry_datetime=expiry_datetime,
         pass_date=pass_date,
         pass_utilized=pass_utilized,
-        origin_id = 1,  # Default (1): Singapore
-        destination_id = 2  # Default (2): Johor Bahru
+        # origin_id = 1,  # Default (1): Singapore
+        # destination_id = 2  # Default (2): Johor Bahru
     )
 
     db.session.add(new_pass)
@@ -705,11 +629,11 @@ def create_pass():
     return jsonify({
         "message": "Pass created successfully",
         "pass_id": pass_id,
-        "vehicle_id": vehicle_id,
+        # "vehicle_id": vehicle_id,
         "creator_user_id": creator_user_id,
-        "creation_datetime": creation_datetime.strftime("%Y-%m-%d %H:%M:%S"),
+        # "creation_datetime": creation_datetime.strftime("%Y-%m-%d %H:%M:%S"),
         "expiry_datetime": expiry_datetime.strftime("%Y-%m-%d %H:%M:%S"),
-        "pass_date": pass_date.strftime("%Y-%m-%d"),
+        "pass_date": pass_date.strftime("%Y-%m-%d %H:%M:%S"),
         "pass_utilized": pass_utilized,
         "travellers_added": travellers_added
     }), 201
@@ -720,11 +644,12 @@ def uploaded_file(filename):
 
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
+
 @app.route('/api/users/<int:user_id>/passes/history', methods=['GET'])
 def get_utilized_passes(user_id):
 
     # Check if the user exists
-    user = User.query.get(user_id)
+    user = UserSensitiveInformation.query.get(user_id)
     if not user:
         return jsonify({"error": "User not found"}), 404
 
@@ -732,12 +657,11 @@ def get_utilized_passes(user_id):
     utilized_passes = (
         db.session.query(
             Pass.pass_id,
-            Pass.vehicle_id,
-            Pass.creation_datetime,
+            # Pass.vehicle_id,
             Pass.expiry_datetime,
             Pass.pass_date,
-            Pass.origin_id,
-            Pass.destination_id
+            #Pass.origin_id,
+            # Pass.destination_id
         )
         .filter(Pass.creator_user_id == user_id, Pass.pass_utilized == True)
         .all()
@@ -747,12 +671,12 @@ def get_utilized_passes(user_id):
     passes_list = [
         {
             "pass_id": p.pass_id,
-            "vehicle_id": p.vehicle_id,
-            "creation_datetime": p.creation_datetime.strftime("%Y-%m-%d %H:%M:%S"),
+            # "vehicle_id": p.vehicle_id,
+            # "creation_datetime": p.creation_datetime.strftime("%Y-%m-%d %H:%M:%S"),
             "expiry_datetime": p.expiry_datetime.strftime("%Y-%m-%d %H:%M:%S"),
-            "pass_date": p.pass_date.strftime("%Y-%m-%d"),
-            "origin_id": p.origin_id,
-            "destination_id": p.destination_id
+            "pass_date": p.pass_date.strftime("%Y-%m-%d %H:%M:%S"),
+            #"origin_id": p.origin_id,
+            # "destination_id": p.destination_id
         }
         for p in utilized_passes
     ]
@@ -761,6 +685,213 @@ def get_utilized_passes(user_id):
         "user_id": user_id,
         "passes_utilized": passes_list
     }), 200
+
+# Updating first name of the user in the profile page
+@app.route('/api/users/<int:user_id>/first-name', methods=['GET', 'POST'])
+def manage_user_first_name(user_id):
+    user = UserSensitiveInformation.query.get(user_id)
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    if request.method == 'GET':
+        return jsonify({"first_name": user.first_name}), 200
+
+    if request.method == 'POST':
+        data = request.get_json()
+        user.first_name = data.get("first_name", user.first_name)
+        db.session.commit()
+        return jsonify({"message": "First name updated successfully"}), 200
+
+
+# Updating middle name of the user in the profile page
+@app.route('/api/users/<int:user_id>/middle-name', methods=['GET', 'POST'])
+def manage_user_middle_name(user_id):
+    user = UserSensitiveInformation.query.get(user_id)
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    if request.method == 'GET':
+        return jsonify({"middle_name": user.middle_name}), 200
+
+    if request.method == 'POST':
+        data = request.get_json()
+        user.middle_name = data.get("middle_name", user.middle_name)
+        db.session.commit()
+        return jsonify({"message": "Middle name updated successfully"}), 200
+
+
+# Updating last name of the user in the profile page
+@app.route('/api/users/<int:user_id>/last-name', methods=['GET', 'POST'])
+def manage_user_last_name(user_id):
+    user = UserSensitiveInformation.query.get(user_id)
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    if request.method == 'GET':
+        return jsonify({"last_name": user.last_name}), 200
+
+    if request.method == 'POST':
+        data = request.get_json()
+        user.last_name = data.get("last_name", user.last_name)
+        db.session.commit()
+        return jsonify({"message": "Last name updated successfully"}), 200
+
+# Updating Date of birth of the user in the profile page
+@app.route('/api/users/<int:user_id>/dob', methods=['GET', 'POST'])
+def manage_user_dob(user_id):
+    user = UserSensitiveInformation.query.get(user_id)
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    if request.method == 'GET':
+        return jsonify({"date_of_birth": user.date_of_birth.strftime("%Y-%m-%d")}), 200
+
+    if request.method == 'POST':
+        data = request.get_json()
+        try:
+            user.date_of_birth = datetime.strptime(data.get("date_of_birth"), "%Y-%m-%d").date()
+            db.session.commit()
+            return jsonify({"message": "Date of Birth updated successfully"}), 200
+        except ValueError:
+            return jsonify({"error": "Invalid date format. Use YYYY-MM-DD"}), 400
+
+
+# Updating Nationality aka Passport Issuing Country of the user in the profile page 
+@app.route('/api/users/<int:user_id>/nationality', methods=['GET', 'POST'])
+def manage_user_nationality(user_id):
+    user = UserSensitiveInformation.query.get(user_id)
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    if request.method == 'GET':
+        return jsonify({"nationality": user.passport_issuing_country}), 200
+
+    if request.method == 'POST':
+        data = request.get_json()
+        user.passport_issuing_country = data.get("nationality", user.passport_issuing_country)
+        db.session.commit()
+        return jsonify({"message": "Nationality updated successfully"}), 200
+
+
+# Updating Passport expiry of the user in the profile page 
+@app.route('/api/users/<int:user_id>/passport-expiry', methods=['GET', 'POST'])
+def manage_passport_expiry(user_id):
+    user = UserSensitiveInformation.query.get(user_id)
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    if request.method == 'GET':
+        return jsonify({"passport_expiry": user.passport_expiry.strftime("%Y-%m-%d")}), 200
+
+    if request.method == 'POST':
+        data = request.get_json()
+        try:
+            user.passport_expiry = datetime.strptime(data.get("passport_expiry"), "%Y-%m-%d")
+            db.session.commit()
+            return jsonify({"message": "Passport expiry date updated successfully"}), 200
+        except ValueError:
+            return jsonify({"error": "Invalid date format. Use YYYY-MM-DD"}), 400
+
+
+# Updating Passport number of the user in the profile page 
+@app.route('/api/users/<int:user_id>/passport-number', methods=['GET', 'POST'])
+def manage_passport_number(user_id):
+    user = UserSensitiveInformation.query.get(user_id)
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    if request.method == 'GET':
+        return jsonify({"passport_number": user.passport_number}), 200
+
+    if request.method == 'POST':
+        data = request.get_json()
+        user.passport_number = data.get("passport_number", user.passport_number)
+        db.session.commit()
+        return jsonify({"message": "Passport number updated successfully"}), 200
+
+# Get all travellers (that are not associated with pass/preset) for a user
+@app.route('/api/users/<int:user_id>/travellers', methods=['GET'])
+def get_user_travellers(user_id):
+    # Check if the creator user exists
+    creator = UserSensitiveInformation.query.get(user_id)
+    if not creator:
+        return jsonify({"error": "User not found"}), 404
+
+    # Query all travellers added by the creator
+    travellers = (
+        db.session.query(
+            UserSensitiveInformation.user_id,
+            UserSensitiveInformation.first_name,
+            UserSensitiveInformation.middle_name,
+            UserSensitiveInformation.last_name,
+            UserSensitiveInformation.passport_number
+        )
+        .join(UserTraveller, UserSensitiveInformation.user_id == UserTraveller.traveller_id)
+        .filter(UserTraveller.creator_user_id == user_id)
+        .all()
+    )
+
+    # Convert traveller data to JSON format
+    traveller_list = [
+        {
+            "traveller_id": t.user_id,
+            "first_name": t.first_name,
+            "middle_name": t.middle_name,
+            "last_name": t.last_name,
+            "passport_number": t.passport_number
+        }
+        for t in travellers
+    ]
+
+    return jsonify({
+        "creator_user_id": user_id,
+        "travellers": traveller_list
+    }), 200
+
+# Add a traveller (that is not associated with pass/preset) for a user
+@app.route('/api/users/<int:user_id>/travellers', methods=['POST'])
+def add_traveller(user_id):
+    # Check if the creator user exists
+    creator = UserSensitiveInformation.query.get(user_id)
+    if not creator:
+        return jsonify({"error": "Creator user not found"}), 404
+
+    # Get JSON data
+    data = request.get_json()
+    passport_number = data.get("passport_number")
+
+    if not passport_number:
+        return jsonify({"error": "Passport number is required"}), 400
+
+    # Find the traveller by passport number
+    traveller = UserSensitiveInformation.query.filter_by(passport_number=passport_number).first()
+    
+    if not traveller:
+        return jsonify({"error": "Traveller with this passport number not found"}), 404
+
+    traveller_id = traveller.user_id
+
+    # Check if traveller is already added by this user
+    existing_entry = UserTraveller.query.filter_by(creator_user_id=user_id, traveller_id=traveller_id).first()
+    if existing_entry:
+        return jsonify({"error": "Traveller already added"}), 400
+
+    # Add to UserTraveller table
+    new_traveller = UserTraveller(creator_user_id=user_id, traveller_id=traveller_id)
+    db.session.add(new_traveller)
+    db.session.commit()
+
+    return jsonify({
+        "message": "Traveller added successfully",
+        "creator_user_id": user_id,
+        "traveller": {
+            "traveller_id": traveller.user_id,
+            "first_name": traveller.first_name,
+            "middle_name": traveller.middle_name,
+            "last_name": traveller.last_name,
+            "passport_number": traveller.passport_number
+        }
+    }), 201
 
 if __name__ == '__main__':
 
@@ -775,4 +906,4 @@ if __name__ == '__main__':
         # Insert mock data
         insert_mock_data()  
 
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0', port=5000)

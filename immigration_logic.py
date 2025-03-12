@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 from db_instance import db
 from sqlalchemy import func
-from models import Vehicle, Pass, UserVehicle, PassTraveller, User  # Import relevant models
+from models import Vehicle, Pass, UserVehicle, PassTraveller, UserSensitiveInformation  # Import relevant models
 
 # Immigration Checkpoint Workflow Logic
 def immigration_walkthrough(license_plate):
@@ -57,7 +57,7 @@ def immigration_walkthrough(license_plate):
     traveller_ids = [pt.user_id for pt in pass_travellers]
 
     # Select those rows in User table if the User id falls under traveller_ids list
-    travellers = User.query.filter(User.user_id.in_(traveller_ids)).all()
+    travellers = UserSensitiveInformation.query.filter(UserSensitiveInformation.user_id.in_(traveller_ids)).all()
 
     # Get the first and last name for the travellers
     traveller_info = [{"first_name": trav.first_name, "last_name": trav.last_name} for trav in travellers]
