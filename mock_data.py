@@ -62,15 +62,15 @@ def insert_mock_data():
     user_vehicle5 = UserVehicle(user_id=4, vehicle_id=3, user_vehicle_model = "User Model 4")
     user_vehicle6 = UserVehicle(user_id=4, vehicle_id=4, user_vehicle_model = "User Model 4.1")
 
-    pass1 = Pass(creator_user_id=1, pass_date=datetime(2025, 3, 7, 0, 0), expiry_datetime=datetime(2025, 3, 8, 0, 0), pass_utilized=True)
+    pass1 = Pass(creator_user_id=1, pass_date=datetime(2025, 3, 7, 08, 15), expiry_datetime=datetime(2025, 3, 8, 08, 15), pass_utilized=True)
     pass2 = Pass(creator_user_id=2, pass_date=datetime(2025, 3, 12, 0, 0), expiry_datetime=datetime(2025, 3, 13, 0, 0), pass_utilized=False)
     pass3 = Pass(creator_user_id=4, pass_date=datetime(2025, 3, 7, 0, 0), expiry_datetime=datetime(2025, 3, 8, 0, 0), pass_utilized=False)
     pass4 = Pass(creator_user_id=4, pass_date=datetime(2025, 2, 19, 0, 0), expiry_datetime=datetime(2025, 2, 20, 0, 0), pass_utilized=False)
     pass5 = Pass(creator_user_id=1, pass_date=datetime(2025, 2, 25, 0, 0), expiry_datetime=datetime(2025, 2, 26, 0, 0), pass_utilized=False)
 
     # New passes for user 1
-    pass6 = Pass(creator_user_id=1, pass_date=datetime(2025, 3, 7, 0, 0), expiry_datetime=datetime(2025, 3, 8, 0, 0), pass_utilized=False)  # Same date as pass1 but pass_utilized=False
-    pass7 = Pass(creator_user_id=1, pass_date=datetime(2025, 4, 15, 0, 0), expiry_datetime=datetime(2025, 4, 16, 0, 0), pass_utilized=False)  # Different date pass
+    pass6 = Pass(creator_user_id=1, pass_date=datetime(2025, 3, 7, 14, 30), expiry_datetime=datetime(2025, 3, 8, 14, 30), pass_utilized=True)  # Same date as pass1 but pass_utilized=False
+    pass7 = Pass(creator_user_id=1, pass_date=datetime(2025, 4, 15, 0, 0), expiry_datetime=datetime(2025, 4, 16, 0, 0), pass_utilized=True)  # Different date pass
 
     pass_traveller1 = PassTraveller(pass_id=1, user_id=1)  # Alice as traveller for SKR9859E
     pass_traveller2 = PassTraveller(pass_id=1, user_id=2)  # Bob as traveller for SKR9859E
