@@ -111,8 +111,8 @@ def insert_mock_data():
     # Adding all records to the session
     db.session.add_all([
         user_sensitive1, user_sensitive2, user_sensitive3, user_sensitive4,
-        vehicle1, vehicle2, vehicle3, vehicle4,
-        user_vehicle1, user_vehicle2, user_vehicle3, user_vehicle4, user_vehicle5, user_vehicle6,
+        vehicle1, vehicle2, vehicle3, vehicle4, vehicle5, vehicle6,
+        user_vehicle1, user_vehicle2, user_vehicle3, user_vehicle4, user_vehicle5, user_vehicle6, user_vehicle7, user_vehicle8,
         pass1, pass2, pass3, pass4, pass5, pass6, pass7,
         pass_traveller1, pass_traveller2, pass_traveller3, pass_traveller4, pass_traveller5, 
         pass_traveller6, pass_traveller7, pass_traveller8, pass_traveller9, pass_traveller10,  # Added missing comma
