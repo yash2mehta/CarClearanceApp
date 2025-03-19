@@ -62,7 +62,7 @@ def insert_mock_data():
     user_vehicle5 = UserVehicle(user_id=4, vehicle_id=3, user_vehicle_model = "User Model 4")
     user_vehicle6 = UserVehicle(user_id=4, vehicle_id=4, user_vehicle_model = "User Model 4.1")
 
-    pass1 = Pass(creator_user_id=1, pass_date=datetime(2025, 3, 7, 08, 15), expiry_datetime=datetime(2025, 3, 8, 08, 15), pass_utilized=True)
+    pass1 = Pass(creator_user_id=1, pass_date=datetime(2025, 3, 7, 8, 15), expiry_datetime=datetime(2025, 3, 8, 8, 15), pass_utilized=True)
     pass2 = Pass(creator_user_id=2, pass_date=datetime(2025, 3, 12, 0, 0), expiry_datetime=datetime(2025, 3, 13, 0, 0), pass_utilized=False)
     pass3 = Pass(creator_user_id=4, pass_date=datetime(2025, 3, 7, 0, 0), expiry_datetime=datetime(2025, 3, 8, 0, 0), pass_utilized=False)
     pass4 = Pass(creator_user_id=4, pass_date=datetime(2025, 2, 19, 0, 0), expiry_datetime=datetime(2025, 2, 20, 0, 0), pass_utilized=False)
