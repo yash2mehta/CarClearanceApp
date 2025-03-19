@@ -66,20 +66,26 @@ def insert_mock_data():
     user_vehicle7 = UserVehicle(user_id=1, vehicle_id=5, user_vehicle_model="Mercedes-Benz C-Class")
     user_vehicle8 = UserVehicle(user_id=1, vehicle_id=6, user_vehicle_model="Audi A4")
 
-    pass1 = Pass(creator_user_id=1, pass_date=datetime(2025, 3, 7, 0, 0), expiry_datetime=datetime(2025, 3, 8, 0, 0), pass_utilized=True)
+    pass1 = Pass(creator_user_id=1, pass_date=datetime(2025, 3, 7, 8, 15), expiry_datetime=datetime(2025, 3, 8, 8, 15), pass_utilized=True)
     pass2 = Pass(creator_user_id=2, pass_date=datetime(2025, 3, 12, 0, 0), expiry_datetime=datetime(2025, 3, 13, 0, 0), pass_utilized=False)
     pass3 = Pass(creator_user_id=4, pass_date=datetime(2025, 3, 7, 0, 0), expiry_datetime=datetime(2025, 3, 8, 0, 0), pass_utilized=False)
     pass4 = Pass(creator_user_id=4, pass_date=datetime(2025, 2, 19, 0, 0), expiry_datetime=datetime(2025, 2, 20, 0, 0), pass_utilized=False)
     pass5 = Pass(creator_user_id=1, pass_date=datetime(2025, 2, 25, 0, 0), expiry_datetime=datetime(2025, 2, 26, 0, 0), pass_utilized=False)
 
     # New passes for user 1
-    pass6 = Pass(creator_user_id=1, pass_date=datetime(2025, 3, 7, 0, 0), expiry_datetime=datetime(2025, 3, 8, 0, 0), pass_utilized=False)  # Same date as pass1 but pass_utilized=False
-    pass7 = Pass(creator_user_id=1, pass_date=datetime(2025, 4, 15, 0, 0), expiry_datetime=datetime(2025, 4, 16, 0, 0), pass_utilized=False)  # Different date pass
+    pass6 = Pass(creator_user_id=1, pass_date=datetime(2025, 3, 7, 14, 30), expiry_datetime=datetime(2025, 3, 8, 14, 30), pass_utilized=True)  # Same date as pass1 but pass_utilized=False
+    pass7 = Pass(creator_user_id=1, pass_date=datetime(2025, 4, 15, 0, 0), expiry_datetime=datetime(2025, 4, 16, 0, 0), pass_utilized=True)  # Different date pass
 
     pass_traveller1 = PassTraveller(pass_id=1, user_id=1)  # Alice as traveller for SKR9859E
     pass_traveller2 = PassTraveller(pass_id=1, user_id=2)  # Bob as traveller for SKR9859E
     pass_traveller3 = PassTraveller(pass_id=2, user_id=2)  # Bob as traveller for SGB267D
     pass_traveller4 = PassTraveller(pass_id=2, user_id=3)  # Charlie as traveller for SGB267D
+    pass_traveller5 = PassTraveller(pass_id=6, user_id=1)  # Alice as traveller for pass6
+    pass_traveller6 = PassTraveller(pass_id=6, user_id=2)  # Bob as co-traveller for pass6
+    pass_traveller7 = PassTraveller(pass_id=6, user_id=3)  # Charlie as co-traveller for pass6
+    pass_traveller8 = PassTraveller(pass_id=6, user_id=4)  # Dave as co-traveller for pass6
+    pass_traveller9 = PassTraveller(pass_id=7, user_id=1)  # Alice as traveller for pass7
+    pass_traveller10 = PassTraveller(pass_id=7, user_id=2)  # Bob as co-traveller for pass7
 
     preset1 = Preset(preset_name="Work Trip", user_id=1)
     preset2 = Preset(preset_name="Vacation Mode", user_id=1)
@@ -107,14 +113,16 @@ def insert_mock_data():
         user_sensitive1, user_sensitive2, user_sensitive3, user_sensitive4,
         vehicle1, vehicle2, vehicle3, vehicle4,
         user_vehicle1, user_vehicle2, user_vehicle3, user_vehicle4, user_vehicle5, user_vehicle6,
-        pass1, pass2, pass3, pass4, pass5,
-        pass_traveller1, pass_traveller2, pass_traveller3, pass_traveller4,
+        pass1, pass2, pass3, pass4, pass5, pass6, pass7,
+        pass_traveller1, pass_traveller2, pass_traveller3, pass_traveller4, pass_traveller5, 
+        pass_traveller6, pass_traveller7, pass_traveller8, pass_traveller9, pass_traveller10,  # Added missing comma
         preset1, preset2, preset3, preset4, preset5,
-        preset_traveller1, preset_traveller2, preset_traveller3, preset_traveller4, preset_traveller5, preset_traveller6, preset_traveller7,
+        preset_traveller1, preset_traveller2, preset_traveller3, preset_traveller4, preset_traveller5, 
+        preset_traveller6, preset_traveller7,
         user_traveller1, user_traveller2, user_traveller3, user_traveller4, user_traveller5
     ])
+
 
     # Commit the session to save the records to the database
     db.session.commit()
     print("✅ Mock data inserted successfully.")
-
