@@ -76,6 +76,12 @@ def insert_mock_data():
     pass_traveller2 = PassTraveller(pass_id=1, user_id=2)  # Bob as traveller for SKR9859E
     pass_traveller3 = PassTraveller(pass_id=2, user_id=2)  # Bob as traveller for SGB267D
     pass_traveller4 = PassTraveller(pass_id=2, user_id=3)  # Charlie as traveller for SGB267D
+    pass_traveller5 = PassTraveller(pass_id=6, user_id=1)  # Alice as traveller for pass6
+    pass_traveller6 = PassTraveller(pass_id=6, user_id=2)  # Bob as co-traveller for pass6
+    pass_traveller7 = PassTraveller(pass_id=6, user_id=3)  # Charlie as co-traveller for pass6
+    pass_traveller8 = PassTraveller(pass_id=6, user_id=4)  # Dave as co-traveller for pass6
+    pass_traveller9 = PassTraveller(pass_id=7, user_id=1)  # Alice as traveller for pass7
+    pass_traveller10 = PassTraveller(pass_id=7, user_id=2)  # Bob as co-traveller for pass7
 
     preset1 = Preset(preset_name="Work Trip", user_id=1)
     preset2 = Preset(preset_name="Vacation Mode", user_id=1)
