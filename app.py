@@ -809,6 +809,27 @@ def manage_passport_number(user_id):
         db.session.commit()
         return jsonify({"message": "Passport number updated successfully"}), 200
 
+# Retrieving all information of user in the profile page
+@app.route('/api/users/<int:user_id>/profile', methods=['GET'])
+def get_user_profile(user_id):
+    user = UserSensitiveInformation.query.get(user_id)
+    
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+    
+    # Only middle name should be the truly optional field. Adding if-else statements for the rest to safely return None in JSON.
+    profile_data = {
+        "first_name": user.first_name if user.first_name else None,
+        "middle_name": user.middle_name if user.middle_name else None,
+        "last_name": user.last_name if user.last_name else None,
+        "date_of_birth": user.date_of_birth.strftime("%Y-%m-%d") if user.date_of_birth else None,
+        "nationality": user.passport_issuing_country if user.passport_issuing_country else None,
+        "passport_expiry": user.passport_expiry.strftime("%Y-%m-%d") if user.passport_expiry else None,
+        "passport_number": user.passport_number if user.passport_number else None
+    }
+
+    return jsonify(profile_data), 200
+
 # Get all travellers (that are not associated with pass/preset) for a user
 @app.route('/api/users/<int:user_id>/travellers', methods=['GET'])
 def get_user_travellers(user_id):

@@ -68,6 +68,10 @@ def insert_mock_data():
     pass4 = Pass(creator_user_id=4, pass_date=datetime(2025, 2, 19, 0, 0), expiry_datetime=datetime(2025, 2, 20, 0, 0), pass_utilized=False)
     pass5 = Pass(creator_user_id=1, pass_date=datetime(2025, 2, 25, 0, 0), expiry_datetime=datetime(2025, 2, 26, 0, 0), pass_utilized=False)
 
+    # New passes for user 1
+    pass6 = Pass(creator_user_id=1, pass_date=datetime(2025, 3, 7, 0, 0), expiry_datetime=datetime(2025, 3, 8, 0, 0), pass_utilized=False)  # Same date as pass1 but pass_utilized=False
+    pass7 = Pass(creator_user_id=1, pass_date=datetime(2025, 4, 15, 0, 0), expiry_datetime=datetime(2025, 4, 16, 0, 0), pass_utilized=False)  # Different date pass
+
     pass_traveller1 = PassTraveller(pass_id=1, user_id=1)  # Alice as traveller for SKR9859E
     pass_traveller2 = PassTraveller(pass_id=1, user_id=2)  # Bob as traveller for SKR9859E
     pass_traveller3 = PassTraveller(pass_id=2, user_id=2)  # Bob as traveller for SGB267D
