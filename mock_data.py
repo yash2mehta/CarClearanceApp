@@ -49,18 +49,22 @@ def insert_mock_data():
         passport_expiry=datetime(2029, 9, 15).date()
     )
 
-    vehicle1 = Vehicle(vehicle_number='SKR9859E')
-    vehicle2 = Vehicle(vehicle_number='SGB267D')
-    vehicle3 = Vehicle(vehicle_number='GBH1206B')
-    vehicle4 = Vehicle(vehicle_number='GBL1368X')
-    vehicle5 = Vehicle(vehicle_number='AAAAAAAA')
+    vehicle1 = Vehicle(vehicle_number='SKR9859E')  # Toyota Corolla
+    vehicle2 = Vehicle(vehicle_number='SGB267D')   # Honda Civic
+    vehicle3 = Vehicle(vehicle_number='GBH1206B')  # Tesla Model 3
+    vehicle4 = Vehicle(vehicle_number='GBL1368X')  # BMW X5
+    vehicle5 = Vehicle(vehicle_number='MKL8721Z')  # Mercedes-Benz C-Class (New vehicle)
+    vehicle6 = Vehicle(vehicle_number='RXA4123M')  # Audi A4 (New vehicle)
 
-    user_vehicle1 = UserVehicle(user_id=1, vehicle_id=1, user_vehicle_model = "User Model 1")
-    user_vehicle2 = UserVehicle(user_id=2, vehicle_id=1, user_vehicle_model = "User Model 2")
-    user_vehicle3 = UserVehicle(user_id=2, vehicle_id=2, user_vehicle_model = "User Model 2.1")
-    user_vehicle4 = UserVehicle(user_id=3, vehicle_id=2, user_vehicle_model = "User Model 3")
-    user_vehicle5 = UserVehicle(user_id=4, vehicle_id=3, user_vehicle_model = "User Model 4")
-    user_vehicle6 = UserVehicle(user_id=4, vehicle_id=4, user_vehicle_model = "User Model 4.1")
+    user_vehicle1 = UserVehicle(user_id=1, vehicle_id=1, user_vehicle_model="Toyota Corolla")
+    user_vehicle2 = UserVehicle(user_id=2, vehicle_id=1, user_vehicle_model="Honda Civic")
+    user_vehicle3 = UserVehicle(user_id=2, vehicle_id=2, user_vehicle_model="Honda Accord")
+    user_vehicle4 = UserVehicle(user_id=3, vehicle_id=2, user_vehicle_model="Mazda CX-5")
+    user_vehicle5 = UserVehicle(user_id=4, vehicle_id=3, user_vehicle_model="Tesla Model 3")
+    user_vehicle6 = UserVehicle(user_id=4, vehicle_id=4, user_vehicle_model="BMW X5")
+    # New vehicles for user 1
+    user_vehicle7 = UserVehicle(user_id=1, vehicle_id=5, user_vehicle_model="Mercedes-Benz C-Class")
+    user_vehicle8 = UserVehicle(user_id=1, vehicle_id=6, user_vehicle_model="Audi A4")
 
     pass1 = Pass(creator_user_id=1, pass_date=datetime(2025, 3, 7, 0, 0), expiry_datetime=datetime(2025, 3, 8, 0, 0), pass_utilized=True)
     pass2 = Pass(creator_user_id=2, pass_date=datetime(2025, 3, 12, 0, 0), expiry_datetime=datetime(2025, 3, 13, 0, 0), pass_utilized=False)
