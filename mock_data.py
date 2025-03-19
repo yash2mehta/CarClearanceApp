@@ -109,8 +109,8 @@ def insert_mock_data():
         user_sensitive1, user_sensitive2, user_sensitive3, user_sensitive4,
         vehicle1, vehicle2, vehicle3, vehicle4,
         user_vehicle1, user_vehicle2, user_vehicle3, user_vehicle4, user_vehicle5, user_vehicle6,
-        pass1, pass2, pass3, pass4, pass5,
-        pass_traveller1, pass_traveller2, pass_traveller3, pass_traveller4,
+        pass1, pass2, pass3, pass4, pass5, pass6, pass7
+        pass_traveller1, pass_traveller2, pass_traveller3, pass_traveller4, pass_traveller5, pass_traveller6, pass_traveller7, pass_traveller8, pass_traveller9, pass_traveller10
         preset1, preset2, preset3, preset4, preset5,
         preset_traveller1, preset_traveller2, preset_traveller3, preset_traveller4, preset_traveller5, preset_traveller6, preset_traveller7,
         user_traveller1, user_traveller2, user_traveller3, user_traveller4, user_traveller5
@@ -119,4 +119,3 @@ def insert_mock_data():
     # Commit the session to save the records to the database
     db.session.commit()
     print("✅ Mock data inserted successfully.")
-
