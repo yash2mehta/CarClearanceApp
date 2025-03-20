@@ -49,6 +49,17 @@ def insert_mock_data():
         passport_expiry=datetime(2029, 9, 15).date()
     )
 
+    user_sensitive5 = UserSensitiveInformation(
+        user_id=5,
+        first_name="Test",
+        middle_name="",
+        last_name="Master",
+        date_of_birth=datetime(1989, 12, 2).date(),
+        passport_issuing_country="Germany",
+        passport_number="ABCDE12345",
+        passport_expiry=datetime(2030, 9, 15).date()
+    )
+
     vehicle1 = Vehicle(vehicle_number='SKR9859E')  # Toyota Corolla
     vehicle2 = Vehicle(vehicle_number='SGB267D')   # Honda Civic
     vehicle3 = Vehicle(vehicle_number='GBH1206B')  # Tesla Model 3
@@ -86,6 +97,13 @@ def insert_mock_data():
     pass_traveller8 = PassTraveller(pass_id=6, user_id=4)  # Dave as co-traveller for pass6
     pass_traveller9 = PassTraveller(pass_id=7, user_id=1)  # Alice as traveller for pass7
     pass_traveller10 = PassTraveller(pass_id=7, user_id=2)  # Bob as co-traveller for pass7
+    pass_traveller11 = PassTraveller(pass_id=3, user_id=4)
+    pass_traveller12 = PassTraveller(pass_id=3, user_id=5)
+    pass_traveller13 = PassTraveller(pass_id=4, user_id=4)
+    pass_traveller14 = PassTraveller(pass_id=4, user_id=5)
+    pass_traveller15 = PassTraveller(pass_id=5, user_id=1)
+    pass_traveller16 = PassTraveller(pass_id=5, user_id=2)
+    pass_traveller17 = PassTraveller(pass_id=5, user_id=3)
 
     preset1 = Preset(preset_name="Work Trip", user_id=1)
     preset2 = Preset(preset_name="Vacation Mode", user_id=1)
@@ -110,12 +128,12 @@ def insert_mock_data():
 
     # Adding all records to the session
     db.session.add_all([
-        user_sensitive1, user_sensitive2, user_sensitive3, user_sensitive4,
+        user_sensitive1, user_sensitive2, user_sensitive3, user_sensitive4, user_sensitive5,
         vehicle1, vehicle2, vehicle3, vehicle4, vehicle5, vehicle6,
         user_vehicle1, user_vehicle2, user_vehicle3, user_vehicle4, user_vehicle5, user_vehicle6, user_vehicle7, user_vehicle8,
         pass1, pass2, pass3, pass4, pass5, pass6, pass7,
         pass_traveller1, pass_traveller2, pass_traveller3, pass_traveller4, pass_traveller5, 
-        pass_traveller6, pass_traveller7, pass_traveller8, pass_traveller9, pass_traveller10,  # Added missing comma
+        pass_traveller6, pass_traveller7, pass_traveller8, pass_traveller9, pass_traveller10, pass_traveller11, pass_traveller12, pass_traveller13, pass_traveller14, pass_traveller15, pass_traveller16, pass_traveller17,
         preset1, preset2, preset3, preset4, preset5,
         preset_traveller1, preset_traveller2, preset_traveller3, preset_traveller4, preset_traveller5, 
         preset_traveller6, preset_traveller7,
