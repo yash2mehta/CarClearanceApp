@@ -197,9 +197,14 @@ def add_vehicle_to_user(user_id):
     # If vehicle number or user vehicle name is not mentioned in incoming JSON, throw error
     if not vehicle_number:
         return jsonify({"error": "Missing vehicle_number"}), 400
+
+    if not user_vehicle_model:
+            return {"error_code": 400, "message": "Missing user_vehicle_model"}, 400
     
     # 3. Check if the vehicle (by plate number) already exists
     vehicle = Vehicle.query.filter_by(vehicle_number=vehicle_number).first()
+
+    
     if not vehicle:
 
         # Create a new vehicle record if none found
@@ -209,8 +214,9 @@ def add_vehicle_to_user(user_id):
 
     # 5. Create a new UserVehicle link
     user_vehicle = UserVehicle(
-        user_id=user_id,
-        vehicle_id=vehicle.vehicle_id,
+        user_id = user_id,
+        vehicle_id = vehicle.vehicle_id,
+        user_vehicle_model = user_vehicle_model
     )
 
     db.session.add(user_vehicle)
@@ -221,7 +227,8 @@ def add_vehicle_to_user(user_id):
         "user_vehicle": {
             "user_id": user_id,
             "vehicle_id": vehicle.vehicle_id,
-            "vehicle_number": vehicle.vehicle_number
+            "vehicle_number": vehicle.vehicle_number,
+            "user_vehicle_model": user_vehicle_model
         }
     }), 201
 
