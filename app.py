@@ -41,11 +41,13 @@ if not os.path.exists(UPLOAD_FOLDER):
 # Initialize SQLAlchemy for the Flask app
 db.init_app(app)
 
+
 # -------- Create API Namespaces --------
 ns_user = api.namespace('users', description='User-related operations')
 ns_vehicle = api.namespace('vehicles', description='Vehicle-related operations')
 ns_preset = api.namespace('presets', description='Preset-related operations')
-ns_pass = api.namespace('passes', description='Pass management')
+ns_pass = api.namespace('passes', description='Pass-related operations')
+ns_traveller = api.namespace('travellers', description='Traveller management')
 
 # -------- Swagger Models --------
 add_vehicle_model = api.model('AddVehicle', {
@@ -153,8 +155,8 @@ create_pass_model = api.model('CreatePass', {
 pass_response_model_2 = api.model('PassResponse2', {
     'pass_id': fields.Integer(readonly=True),
     'creator_user_id': fields.Integer(required=True, description="User ID of the creator of the pass"),
-    'pass_date': fields.DateTime(required=True, description="Date and time of the pass creation"),
-    'expiry_datetime': fields.DateTime(required=True, description="Expiry date and time of the pass"),
+    'pass_date': fields.String(required=True, description="Date and time of the pass creation"),  # Changed from DateTime to String
+    'expiry_datetime': fields.String(required=True, description="Expiry date and time of the pass"),  # Changed from DateTime to String
     'pass_utilized': fields.Boolean(required=True, description="Whether the pass has been utilized"),
     'travellers_added': fields.List(fields.Nested(traveller_model_with_user_id), description="List of travellers added to the pass")
 })
@@ -264,6 +266,14 @@ success_message_model = api.model('FieldUpdateSuccess', {
     )
 })
 
+delete_message_model = api.model('DeleteMessage', {
+    'message': fields.String(
+        required=True, 
+        description="Message indicating successful deletion of particular resource", 
+        example="The resource you are trying to delete has been deleted"
+    )
+})
+
 # Define the error response model for 400 Error
 error_response_model_400 = api.model('ErrorResponse400', {
     'error_code': fields.Integer(example = 400, description="Error code indicating the type of error"),
@@ -276,6 +286,123 @@ error_response_model_404 = api.model('ErrorResponse404', {
     'message': fields.String(example="Particular resource not found", description="Error message explaining the issue")
 })
 
+# Add this model near the other swagger models
+delete_traveller_model = api.model('DeleteTraveller', {
+    'traveller_user_id': fields.Integer(
+        required=True, 
+        description="The user ID of the traveller to be deleted",
+        example=2  # Example value for the traveller's user ID
+    )
+})
+
+# Add this model near the other swagger models
+delete_traveller_by_passport_model = api.model('DeleteTravellerByPassport', {
+    'passport_number': fields.String(
+        required=True, 
+        description="The passport number of the traveller to be deleted",
+        example="A12345678"  # Example value for the passport number
+    )
+})
+
+# Add this model near the other swagger models
+delete_vehicle_model = api.model('DeleteVehicle', {
+    'vehicle_number': fields.String(
+        required=True, 
+        description="The license plate number of the vehicle to be deleted",
+        example="SKR9859E"  # Example value for the vehicle number
+    )
+})
+
+# Add this model near the other swagger models
+delete_vehicle_by_id_model = api.model('DeleteVehicleById', {
+    'vehicle_id': fields.Integer(
+        required=True, 
+        description="The ID of the vehicle to be deleted",
+        example=1  # Example value for the vehicle ID
+    )
+})
+
+# Update this model for updating preset name
+update_preset_name_model = api.model('UpdatePresetName', {
+    'preset_id': fields.Integer(
+        required=True,
+        description="The ID of the preset to update",
+        example=2
+    ),
+    'preset_name': fields.String(
+        required=True,
+        description="The new name for the preset",
+        example="Family Vacation"
+    )
+})
+
+# Add this model for updating preset travellers
+update_preset_travellers_model = api.model('UpdatePresetTravellers', {
+    'preset_id': fields.Integer(
+        required=True,
+        description="The ID of the preset to update",
+        example=2
+    ),
+    'traveller_ids': fields.List(
+        fields.Integer,
+        required=True,
+        description="List of user IDs to be associated with the preset",
+        example=[1, 2, 3]
+    )
+})
+
+# Add this model for updating both preset name and travellers
+update_preset_model = api.model('UpdatePreset', {
+    'preset_id': fields.Integer(
+        required=True,
+        description="The ID of the preset to update",
+        example=2
+    ),
+    'preset_name': fields.String(
+        required=True,
+        description="The new name for the preset",
+        example="Family Vacation"
+    ),
+    'traveller_ids': fields.List(
+        fields.Integer,
+        required=True,
+        description="List of user IDs to be associated with the preset",
+        example=[1, 2, 3]
+    )
+})
+
+# Add this model near the other swagger models
+delete_preset_model = api.model('DeletePreset', {
+    'preset_id': fields.Integer(
+        required=True, 
+        description="The ID of the preset to be deleted",
+        example=1  # Example value for the preset ID
+    )
+})
+
+# Add this model near the other swagger models
+update_pass_travellers_model = api.model('UpdatePassTravellers', {
+    'pass_id': fields.Integer(
+        required=True,
+        description="The ID of the pass to update",
+        example=1
+    ),
+    'traveller_ids': fields.List(
+        fields.Integer,
+        required=True,
+        description="List of user IDs to be associated with the pass",
+        example=[1, 2, 3]
+    )
+})
+
+# Add this model near the other swagger models
+delete_pass_model = api.model('DeletePass', {
+    'pass_id': fields.Integer(
+        required=True, 
+        description="The ID of the pass to be deleted",
+        example=1  # Example value for the pass ID
+    )
+})
 
 # -------- Plate Recognizer code --------
 
@@ -457,6 +584,32 @@ def vehicular_guidance_system():
 
 # -------- Mobile App code --------
 
+# Endpoint for displaying all the tables currently in the database
+@app.route('/show-tables')
+def view_tables():
+    # Fetch all data from your database
+    user_sensitive_data = UserSensitiveInformation.query.all()
+    vehicle_data = Vehicle.query.all()
+    user_vehicle_data = UserVehicle.query.all()
+    pass_data = Pass.query.all()
+    pass_traveller_data = PassTraveller.query.all()
+    preset_data = Preset.query.all()
+    preset_traveller_data = PresetTraveller.query.all()
+    user_traveller_data = UserTraveller.query.all()
+
+    # Pass all data to the template
+    return render_template('view_tables.html',
+        user_sensitive_data=user_sensitive_data,
+        vehicle_data=vehicle_data,
+        user_vehicle_data=user_vehicle_data,
+        pass_data=pass_data,
+        pass_traveller_data=pass_traveller_data,
+        preset_data=preset_data,
+        preset_traveller_data=preset_traveller_data,
+        user_traveller_data=user_traveller_data
+    )
+
+
 
 # Endpoint for adding vehicle to user
 @ns_vehicle.route('/<int:user_id>/add-vehicle')
@@ -550,6 +703,107 @@ class UserVehiclesResource(Resource):
             })
 
         return api.marshal(vehicles_list, all_vehicles_model), 200
+
+@ns_vehicle.route('/<int:user_id>/delete-vehicle-by-number')
+class DeleteVehicleResource(Resource):
+    """Delete a vehicle from a user's vehicle list based on vehicle number"""
+
+    @api.expect(delete_vehicle_model)
+    @api.response(200, 'Vehicle deleted successfully', delete_message_model)
+    @api.response(400, 'Required fields missing', error_response_model_400)
+    @api.response(404, 'User, vehicle or association not found', error_response_model_404)
+    def delete(self, user_id):
+        """Delete a vehicle from the user's list of vehicles by vehicle number."""
+        
+        # Check if the user exists
+        user = UserSensitiveInformation.query.get(user_id)
+        if not user:
+            return {"error_code": 404, "message": "User not found"}, 404
+
+        # Get JSON data
+        data = request.get_json()
+        vehicle_number = data.get("vehicle_number")
+
+        if not vehicle_number:
+            return {"error_code": 400, "message": "Vehicle number is required"}, 400
+
+        # Find the vehicle by vehicle number
+        vehicle = Vehicle.query.filter_by(vehicle_number=vehicle_number).first()
+        if not vehicle:
+            return {"error_code": 404, "message": "Vehicle with this number not found"}, 404
+
+        vehicle_id = vehicle.vehicle_id
+
+        # Find the UserVehicle entry
+        user_vehicle = UserVehicle.query.filter_by(
+            user_id=user_id,
+            vehicle_id=vehicle_id
+        ).first()
+
+        if not user_vehicle:
+            return {
+                "error_code": 404, 
+                "message": "This vehicle is not in your vehicle list"
+            }, 404
+
+        # Delete the entry from UserVehicle
+        db.session.delete(user_vehicle)
+        db.session.commit()
+
+        # Note: We're not deleting the Vehicle record itself from the Vehicle table,
+        # as it might be associated with other users or could be needed for historical data.
+        # We're only removing the association between this user and this vehicle.
+
+        return {"message": f"Vehicle with number {vehicle_number} removed from your vehicles list"}, 200
+
+@ns_vehicle.route('/<int:user_id>/delete-vehicle-by-id')
+class DeleteVehicleByIdResource(Resource):
+    """Delete a vehicle from a user's vehicle list based on vehicle ID"""
+
+    @api.expect(delete_vehicle_by_id_model)
+    @api.response(200, 'Vehicle deleted successfully', success_message_model)
+    @api.response(400, 'Required fields missing', error_response_model_400)
+    @api.response(404, 'User, vehicle or association not found', error_response_model_404)
+    def delete(self, user_id):
+        """Delete a vehicle from the user's list of vehicles by vehicle ID."""
+        
+        # Check if the user exists
+        user = UserSensitiveInformation.query.get(user_id)
+        if not user:
+            return {"error_code": 404, "message": "User not found"}, 404
+
+        # Get JSON data
+        data = request.get_json()
+        vehicle_id = data.get("vehicle_id")
+
+        if not vehicle_id:
+            return {"error_code": 400, "message": "Vehicle ID is required"}, 400
+
+        # Check if the vehicle exists
+        vehicle = Vehicle.query.get(vehicle_id)
+        if not vehicle:
+            return {"error_code": 404, "message": "Vehicle with this ID not found"}, 404
+
+        # Find the UserVehicle entry
+        user_vehicle = UserVehicle.query.filter_by(
+            user_id=user_id,
+            vehicle_id=vehicle_id
+        ).first()
+
+        if not user_vehicle:
+            return {
+                "error_code": 404, 
+                "message": "This vehicle is not in your vehicle list"
+            }, 404
+
+        # Delete the entry from UserVehicle
+        db.session.delete(user_vehicle)
+        db.session.commit()
+
+        # Note: We're only removing the association between the user and the vehicle,
+        # not deleting the vehicle record from the Vehicle table
+
+        return {"message": f"Vehicle with ID {vehicle_id} removed from your vehicles list"}, 200
 
 @ns_preset.route('/<int:preset_id>/get-users')
 class PresetUsersResource(Resource):
@@ -754,7 +1008,7 @@ class CreatePresetResource(Resource):
     def post(self):
         """Create a preset and add travellers to it."""
 
-        # Extract data from request body
+        # Extract data from request body        
         data = request.get_json()
 
         preset_name = data.get("preset_name")
@@ -821,6 +1075,221 @@ class CreatePresetResource(Resource):
         # Return response
         return api.marshal(response, preset_response_model), 200
 
+@ns_preset.route('/<int:user_id>/update-preset-name')
+class UpdatePresetNameResource(Resource):
+    """Update the name of a preset for a specific user, through preset id"""
+
+    @api.expect(update_preset_name_model)
+    @api.response(200, 'Preset name updated successfully', success_message_model)
+    @api.response(400, 'Required fields missing', error_response_model_400)
+    @api.response(404, 'User or preset not found, or preset does not belong to user', error_response_model_404)
+    def put(self, user_id):
+        """Update the name of a preset."""
+        
+        # Check if the user exists
+        user = UserSensitiveInformation.query.get(user_id)
+        if not user:
+            return {"error_code": 404, "message": "User not found"}, 404
+
+        # Get JSON data
+        data = request.get_json()
+        preset_id = data.get("preset_id")
+        new_preset_name = data.get("preset_name")
+
+        # Validate required fields
+        if not preset_id:
+            return {"error_code": 400, "message": "Preset ID is required"}, 400
+        
+        if not new_preset_name:
+            return {"error_code": 400, "message": "Preset name is required"}, 400
+
+        # Check if the preset exists
+        preset = Preset.query.get(preset_id)
+        if not preset:
+            return {"error_code": 404, "message": "Preset not found"}, 404
+
+        # Check if the preset belongs to the user
+        if preset.user_id != user_id:
+            return {
+                "error_code": 404, 
+                "message": "This preset does not belong to the specified user"
+            }, 404
+
+        # Update the preset name
+        preset.preset_name = new_preset_name
+        db.session.commit()
+
+        return {"message": f"Preset name updated successfully to '{new_preset_name}'"}, 200
+
+@ns_preset.route('/<int:user_id>/update-preset-travellers')
+class UpdatePresetTravellersResource(Resource):
+    """Update the travellers associated with a preset through a list of the user ids of the travellers."""
+
+    @api.expect(update_preset_travellers_model)
+    @api.response(200, 'Preset travellers updated successfully', preset_response_model)
+    @api.response(400, 'Required fields missing', error_response_model_400)
+    @api.response(404, 'User, preset or traveller not found, or preset does not belong to user', error_response_model_404)
+    def put(self, user_id):
+        """Update the travellers in a preset through a list of the user ids of the travellers."""
+        
+        # Check if the user exists
+        user = UserSensitiveInformation.query.get(user_id)
+        if not user:
+            return {"error_code": 404, "message": "User not found"}, 404
+
+        # Get JSON data
+        data = request.get_json()
+        preset_id = data.get("preset_id")
+        traveller_ids = data.get("traveller_ids", [])
+
+        # Validate required fields
+        if not preset_id:
+            return {"error_code": 400, "message": "Preset ID is required"}, 400
+        
+        if not isinstance(traveller_ids, list):
+            return {"error_code": 400, "message": "traveller_ids must be a list"}, 400
+
+        # Check if the preset exists
+        preset = Preset.query.get(preset_id)
+        if not preset:
+            return {"error_code": 404, "message": "Preset not found"}, 404
+
+        # Check if the preset belongs to the user
+        if preset.user_id != user_id:
+            return {
+                "error_code": 404, 
+                "message": "This preset does not belong to the specified user"
+            }, 404
+
+        # Check if all traveller IDs exist
+        for traveller_id in traveller_ids:
+            traveller = UserSensitiveInformation.query.get(traveller_id)
+            if not traveller:
+                return {"error_code": 404, "message": f"Traveller with ID {traveller_id} not found"}, 404
+
+        # Remove all existing traveller associations for this preset
+        PresetTraveller.query.filter_by(preset_id=preset_id).delete()
+        
+        # Create new associations for all travellers in the list
+        travellers_added = []
+        for traveller_id in traveller_ids:
+            # Add to PresetTraveller table
+            preset_traveller = PresetTraveller(preset_id=preset_id, user_id=traveller_id)
+            db.session.add(preset_traveller)
+            
+            # Get traveller info for response
+            traveller = UserSensitiveInformation.query.get(traveller_id)
+            travellers_added.append({
+                "user_id": traveller_id,
+                "first_name": traveller.first_name,
+                "middle_name": traveller.middle_name,
+                "last_name": traveller.last_name,
+                "passport_number": traveller.passport_number
+            })
+        
+        # Commit all changes
+        db.session.commit()
+
+        # Prepare response
+        response = {
+            "preset_id": preset_id,
+            "preset_name": preset.preset_name,
+            "created_by_user_id": user_id,
+            "travellers_added": travellers_added
+        }
+
+        return api.marshal(response, preset_response_model), 200
+
+@ns_preset.route('/<int:user_id>/update-preset')
+class UpdatePresetResource(Resource):
+    """Update both the name and travellers of a preset."""
+
+    @api.expect(update_preset_model)
+    @api.response(200, 'Preset updated successfully', preset_response_model)
+    @api.response(400, 'Required fields missing', error_response_model_400)
+    @api.response(404, 'User, preset or traveller not found, or preset does not belong to user', error_response_model_404)
+    def put(self, user_id):
+        """Update both the name and travellers of a preset in a single operation."""
+        
+        # Check if the user exists
+        user = UserSensitiveInformation.query.get(user_id)
+        if not user:
+            return {"error_code": 404, "message": "User not found"}, 404
+
+        # Get JSON data
+        data = request.get_json()
+        preset_id = data.get("preset_id")
+        new_preset_name = data.get("preset_name")
+        traveller_ids = data.get("traveller_ids", [])
+
+        # Validate required fields
+        if not preset_id:
+            return {"error_code": 400, "message": "Preset ID is required"}, 400
+        
+        if not new_preset_name:
+            return {"error_code": 400, "message": "Preset name is required"}, 400
+        
+        if not isinstance(traveller_ids, list):
+            return {"error_code": 400, "message": "traveller_ids must be a list"}, 400
+
+        # Check if the preset exists
+        preset = Preset.query.get(preset_id)
+        if not preset:
+            return {"error_code": 404, "message": "Preset not found"}, 404
+
+        # Check if the preset belongs to the user
+        if preset.user_id != user_id:
+            return {
+                "error_code": 404, 
+                "message": "This preset does not belong to the specified user"
+            }, 404
+
+        # Check if all traveller IDs exist
+        for traveller_id in traveller_ids:
+            traveller = UserSensitiveInformation.query.get(traveller_id)
+            if not traveller:
+                return {"error_code": 404, "message": f"Traveller with ID {traveller_id} not found"}, 404
+
+        try:
+            # Update preset name
+            preset.preset_name = new_preset_name
+
+            # Remove all existing traveller associations for this preset
+            PresetTraveller.query.filter_by(preset_id=preset_id).delete()
+            
+            # Create new associations for all travellers in the list
+            travellers_added = []
+            for traveller_id in traveller_ids:
+                # Add to PresetTraveller table
+                preset_traveller = PresetTraveller(preset_id=preset_id, user_id=traveller_id)
+                db.session.add(preset_traveller)
+                
+                # Get traveller info for response
+                traveller = UserSensitiveInformation.query.get(traveller_id)
+                travellers_added.append({
+                    "user_id": traveller_id,
+                    "first_name": traveller.first_name,
+                    "middle_name": traveller.middle_name,
+                    "last_name": traveller.last_name,
+                    "passport_number": traveller.passport_number
+                })
+            
+            # Commit all changes
+            db.session.commit()
+
+            # Prepare response
+            response = {
+                "preset_id": preset_id,
+                "preset_name": new_preset_name,
+                "created_by_user_id": user_id,
+                "travellers_added": travellers_added
+            }
+
+            return api.marshal(response, preset_response_model), 200
+
+        except Exception as e:
+            db.session.rollback()
+            return {"error_code": 400, "message": f"Error updating preset: {str(e)}"}, 400
 
 @ns_pass.route('/<int:user_id>/passes')
 class UserPassesResource(Resource):
@@ -1264,7 +1733,7 @@ class UserProfileResource(Resource):
 
         return api.marshal(profile_data, user_profile_model), 200
 
-@ns_user.route('/<int:user_id>/get-travellers')
+@ns_traveller.route('/<int:user_id>/get-travellers')
 class UserTravellersResource(Resource):
     """Get all travellers (that are not associated with pass/preset) for a user."""
 
@@ -1312,7 +1781,7 @@ class UserTravellersResource(Resource):
         }
         return api.marshal_with(response, user_travellers_model), 200
 
-@ns_user.route('/<int:user_id>/add-traveller')
+@ns_traveller.route('/<int:user_id>/add-traveller')
 class AddTravellerResource(Resource):
     """Add a traveller (not associated with pass/preset) for a user."""
 
@@ -1367,6 +1836,324 @@ class AddTravellerResource(Resource):
 
         return api.marshal_with(response, user_travellers_model), 201
 
+@ns_traveller.route('/<int:user_id>/delete-traveller-by-user-id')
+class DeleteTravellerResource(Resource):
+    """Delete a traveller from a user's traveller list based on the traveller's user id """
+
+    @api.expect(delete_traveller_model)
+    @api.response(200, 'Traveller deleted successfully', success_message_model)
+    @api.response(400, 'Required fields missing', error_response_model_400)
+    @api.response(404, 'User or traveller not found', error_response_model_404)
+    def delete(self, user_id):
+        """Delete a traveller from the user's list of travellers."""
+        
+        # Check if the managing user exists
+        creator_user_id = UserSensitiveInformation.query.get(user_id)
+        if not creator_user_id:
+            return {"error_code": 404, "message": "Creator user id not found"}, 404
+
+        # Get JSON data
+        data = request.get_json()
+        traveller_user_id = data.get("traveller_user_id")
+
+        if not traveller_user_id:
+            return {"error_code": 400, "message": "Traveller user ID is required"}, 400
+
+        # Check if the traveller exists
+        traveller = UserSensitiveInformation.query.get(traveller_user_id)
+        if not traveller:
+            return {"error_code": 404, "message": "Traveller not found"}, 404
+
+        # Find and delete the UserTraveller entry
+        user_traveller = UserTraveller.query.filter_by(
+            creator_user_id=user_id,
+            traveller_id=traveller_user_id
+        ).first()
+
+        if not user_traveller:
+            return {
+                "error_code": 404, 
+                "message": "This traveller is not in your traveller list"
+            }, 404
+
+        # Delete the entry
+        db.session.delete(user_traveller)
+        db.session.commit()
+
+        return {"message": "Traveller deleted successfully"}, 200
+
+@ns_traveller.route('/<int:user_id>/delete-traveller-by-passport')
+class DeleteTravellerByPassportResource(Resource):
+    """Delete a traveller from a user's traveller list based on the traveller's passport number"""
+
+    @api.expect(delete_traveller_by_passport_model)
+    @api.response(200, 'Traveller deleted successfully', success_message_model)
+    @api.response(400, 'Required fields missing', error_response_model_400)
+    @api.response(404, 'User or traveller not found', error_response_model_404)
+    def delete(self, user_id):
+        """Delete a traveller from the user's list of travellers by passport number."""
+        
+        # Check if the managing user exists
+        creator_user = UserSensitiveInformation.query.get(user_id)
+        if not creator_user:
+            return {"error_code": 404, "message": "Creator user not found"}, 404
+
+        # Get JSON data
+        data = request.get_json()
+        passport_number = data.get("passport_number")
+
+        if not passport_number:
+            return {"error_code": 400, "message": "Passport number is required"}, 400
+
+        # Find the traveller by passport number
+        traveller = UserSensitiveInformation.query.filter_by(passport_number=passport_number).first()
+        if not traveller:
+            return {"error_code": 404, "message": "Traveller with this passport number not found"}, 404
+
+        traveller_id = traveller.user_id
+
+        # Find and delete the UserTraveller entry
+        user_traveller = UserTraveller.query.filter_by(
+            creator_user_id=user_id,
+            traveller_id=traveller_id
+        ).first()
+
+        if not user_traveller:
+            return {
+                "error_code": 404, 
+                "message": "This traveller is not in your traveller list"
+            }, 404
+
+        # Delete the entry
+        db.session.delete(user_traveller)
+        db.session.commit()
+
+        return {"message": f"Traveller with passport number {passport_number} deleted successfully"}, 200
+
+@ns_preset.route('/<int:user_id>/delete-preset')
+class DeletePresetResource(Resource):
+    """Delete a preset and its associated traveller relationships, through its preset id"""
+
+    @api.expect(delete_preset_model)
+    @api.response(200, 'Preset deleted successfully', success_message_model)
+    @api.response(400, 'Required fields missing', error_response_model_400)
+    @api.response(404, 'User, preset not found, or preset does not belong to user', error_response_model_404)
+    def delete(self, user_id):
+        """Delete a preset and its associated traveller relationships."""
+        
+        # Check if the user exists
+        user = UserSensitiveInformation.query.get(user_id)
+        if not user:
+            return {"error_code": 404, "message": "User not found"}, 404
+
+        # Get JSON data
+        data = request.get_json()
+        preset_id = data.get("preset_id")
+
+        if not preset_id:
+            return {"error_code": 400, "message": "Preset ID is required"}, 400
+
+        # Check if the preset exists
+        preset = Preset.query.get(preset_id)
+        if not preset:
+            return {"error_code": 404, "message": "Preset not found"}, 404
+
+        # Check if the preset belongs to the user
+        if preset.user_id != user_id:
+            return {
+                "error_code": 404, 
+                "message": "This preset does not belong to the specified user"
+            }, 404
+
+        try:
+            # First delete all associated PresetTraveller entries
+            PresetTraveller.query.filter_by(preset_id=preset_id).delete()
+            
+            # Then delete the preset itself
+            db.session.delete(preset)
+            db.session.commit()
+
+            return {"message": f"Preset with ID {preset_id} has been deleted successfully"}, 200
+
+        except Exception as e:
+            db.session.rollback()
+            return {"error_code": 400, "message": f"Error deleting preset: {str(e)}"}, 400
+
+@ns_pass.route('/<int:user_id>/update-pass-travellers')
+class UpdatePassTravellersResource(Resource):
+    """Update the travellers associated with a pass."""
+
+    @api.expect(update_pass_travellers_model)
+    @api.response(200, 'Pass travellers updated successfully', pass_response_model_2)
+    @api.response(400, 'Required fields missing', error_response_model_400)
+    @api.response(404, 'User, pass or traveller not found, or pass does not belong to user', error_response_model_404)
+    def put(self, user_id):
+        """Update the travellers in a pass through a list of user IDs."""
+        
+        # Check if the user exists
+        user = UserSensitiveInformation.query.get(user_id)
+        if not user:
+            return {"error_code": 404, "message": "User not found"}, 404
+        # Get JSON data
+        data = request.get_json()
+        pass_id = data.get("pass_id")
+        traveller_ids = data.get("traveller_ids", [])
+
+        # Validate required fields
+        if not pass_id:
+            return {"error_code": 400, "message": "Pass ID is required"}, 400
+        
+        if not isinstance(traveller_ids, list):
+            return {"error_code": 400, "message": "traveller_ids must be a list"}, 400
+
+        # Check if the pass exists
+        pass_entry = Pass.query.get(pass_id)
+        if not pass_entry:
+            return {"error_code": 404, "message": "Pass not found"}, 404
+
+        # Check if the pass belongs to the user
+        if pass_entry.creator_user_id != user_id:
+            return {
+                "error_code": 404, 
+                "message": "This pass does not belong to the specified user"
+            }, 404
+
+        # Check if all traveller IDs exist
+        for traveller_id in traveller_ids:
+            traveller = UserSensitiveInformation.query.get(traveller_id)
+            if not traveller:
+                return {"error_code": 404, "message": f"Traveller with ID {traveller_id} not found"}, 404
+
+        try:
+            # Remove all existing traveller associations for this pass
+            PassTraveller.query.filter_by(pass_id=pass_id).delete()
+            
+            # Create new associations for all travellers in the list
+            travellers_added = []
+            for traveller_id in traveller_ids:
+                # Add to PassTraveller table
+                pass_traveller = PassTraveller(pass_id=pass_id, user_id=traveller_id)
+                db.session.add(pass_traveller)
+                
+                # Get traveller info for response
+                traveller = UserSensitiveInformation.query.get(traveller_id)
+                travellers_added.append({
+                    "user_id": traveller_id,
+                    "first_name": traveller.first_name,
+                    "middle_name": traveller.middle_name,
+                    "last_name": traveller.last_name,
+                    "passport_number": traveller.passport_number
+                })
+            
+            # Commit all changes
+            db.session.commit()
+
+            # Prepare response
+            response = {
+                "pass_id": pass_id,
+                "creator_user_id": user_id,
+                "pass_date": pass_entry.pass_date.strftime("%Y-%m-%d %H:%M:%S"),
+                "expiry_datetime": pass_entry.expiry_datetime.strftime("%Y-%m-%d %H:%M:%S"),
+                "pass_utilized": pass_entry.pass_utilized,
+                "travellers_added": travellers_added
+            }
+
+            return api.marshal(response, pass_response_model_2), 200
+
+        except Exception as e:
+            db.session.rollback()
+            return {"error_code": 400, "message": f"Error updating pass travellers: {str(e)}"}, 400
+
+@ns_pass.route('/<int:user_id>/delete-pass')
+class DeletePassResource(Resource):
+    """Delete a pass and its associated traveller relationships through pass id"""
+
+    @api.expect(delete_pass_model)
+    @api.response(200, 'Pass deleted successfully', success_message_model)
+    @api.response(400, 'Required fields missing', error_response_model_400)
+    @api.response(404, 'User, pass not found, or pass does not belong to user', error_response_model_404)
+    def delete(self, user_id):
+        """Delete a pass and its associated traveller relationships."""
+        
+        # Check if the user exists
+        user = UserSensitiveInformation.query.get(user_id)
+        if not user:
+            return {"error_code": 404, "message": "User not found"}, 404
+
+        # Get JSON data
+        data = request.get_json()
+        pass_id = data.get("pass_id")
+
+        if not pass_id:
+            return {"error_code": 400, "message": "Pass ID is required"}, 400
+
+        # Check if the pass exists
+        pass_entry = Pass.query.get(pass_id)
+        if not pass_entry:
+            return {"error_code": 404, "message": "Pass not found"}, 404
+
+        # Check if the pass belongs to the user
+        if pass_entry.creator_user_id != user_id:
+            return {
+                "error_code": 404, 
+                "message": "This pass does not belong to the specified user"
+            }, 404
+
+        try:
+            # First delete all associated PassTraveller entries
+            PassTraveller.query.filter_by(pass_id=pass_id).delete()
+            
+            # Then delete the pass itself
+            db.session.delete(pass_entry)
+            db.session.commit()
+
+            return {"message": f"Pass with ID {pass_id} has been deleted successfully"}, 200
+
+        except Exception as e:
+            db.session.rollback()
+            return {"error_code": 400, "message": f"Error deleting pass: {str(e)}"}, 400
+
+@ns_pass.route('/<int:user_id>/delete-utilized-passes')
+class DeleteUtilizedPassesResource(Resource):
+    """Delete all utilized passes and their associated traveller relationships for a specific user."""
+
+    @api.response(200, 'Utilized passes deleted successfully', success_message_model)
+    @api.response(404, 'User not found', error_response_model_404)
+    def delete(self, user_id):
+        """Delete all utilized passes and their associated traveller relationships for a user."""
+        
+        # Check if the user exists
+        user = UserSensitiveInformation.query.get(user_id)
+        if not user:
+            return {"error_code": 404, "message": "User not found"}, 404
+
+        try:
+            # Get all utilized passes for the user
+            utilized_passes = Pass.query.filter_by(
+                creator_user_id=user_id,
+                pass_utilized=True
+            ).all()
+
+            if not utilized_passes:
+                return {"message": "No utilized passes found for this user"}, 200
+
+            pass_count = 0
+            for pass_entry in utilized_passes:
+                # Delete all associated PassTraveller entries for each pass
+                PassTraveller.query.filter_by(pass_id=pass_entry.pass_id).delete()
+                
+                # Delete the pass itself
+                db.session.delete(pass_entry)
+                pass_count += 1
+
+            # Commit all changes
+            db.session.commit()
+
+            return {"message": f"Successfully deleted {pass_count} utilized passes"}, 200
+
+        except Exception as e:
+            db.session.rollback()
+            return {"error_code": 400, "message": f"Error deleting utilized passes: {str(e)}"}, 400
 
 if __name__ == '__main__':
 

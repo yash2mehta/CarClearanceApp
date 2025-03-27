@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Database Tables</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #3f0095;
+            --secondary-color: #7383e6;
+            --light-blue: #f0f3ff;
+            --mid-blue: #b8c1f0;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+        
+        h2 {
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+        
+        .table-container {
+            margin-bottom: 15px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            overflow: hidden;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+            position: relative;
+        }
+        
+        .collapsible {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            cursor: pointer;
+            padding: 15px 20px;
+            width: 100%;
+            border: none;
+            text-align: left;
+            outline: none;
+            font-size: 16px;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: var(--transition);
+        }
+        
+        .collapsible:hover {
+            background: linear-gradient(135deg, #4b00b3, #8494f0);
+        }
+        
+        .header-with-tooltip {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .arrow-icon {
+            transition: var(--transition);
+            font-size: 18px;
+        }
+        
+        .active .arrow-icon {
+            transform: rotate(180deg);
+        }
+        
+        .content {
+            padding: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease;
+            background-color: white;
+        }
+        
+        .scrollable-table {
+            max-height: 400px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: var(--secondary-color) #f1f1f1;
+        }
+        
+        .scrollable-table::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .scrollable-table::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        
+        .scrollable-table::-webkit-scrollbar-thumb {
+            background-color: var(--secondary-color);
+            border-radius: 10px;
+        }
+        
+        .scrollable-table table {
+            width: 100%;
+            border-collapse: collapse;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+        }
+        
+        .scrollable-table th {
+            background-color: var(--light-blue);
+            color: var(--primary-color);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 14px;
+            padding: 12px 15px;
+            text-align: left;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            border-bottom: 2px solid var(--mid-blue);
+        }
+        
+        .scrollable-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid rgba(115, 131, 230, 0.2);
+            font-size: 14px;
+        }
+        
+        .scrollable-table tr:nth-child(even) {
+            background-color: rgba(240, 243, 255, 0.5);
+        }
+        
+        .scrollable-table tr:hover {
+            background-color: rgba(115, 131, 230, 0.1);
+        }
+        
+        /* Tooltip styling */
+        .tooltip-icon {
+            position: relative;
+            display: inline-block;
+            cursor: help;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+            margin-left: 5px;
+        }
+        
+        th .tooltip-icon {
+            color: var(--primary-color);
+            margin-left: 4px;
+            font-size: 12px;
+        }
+        
+        /* Fixed tooltip positioning and visibility */
+        .tooltip-icon .tooltip-text {
+            visibility: hidden;
+            width: 200px;
+            background-color: rgba(0, 0, 0, 0.85);
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 8px;
+            position: fixed;
+            z-index: 9999;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-weight: normal;
+            font-size: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            pointer-events: none;
+            white-space: normal;
+            line-height: 1.4;
+        }
+        
+        /* Arrow for tooltips */
+        .tooltip-icon .tooltip-text::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: rgba(0, 0, 0, 0.85) transparent transparent transparent;
+        }
+        
+        /* Show the tooltip on hover */
+        .tooltip-icon:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* Make tooltips visible on touch for mobile devices */
+        .tooltip-icon:focus .tooltip-text,
+        .tooltip-icon:active .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+        
+        /* For the header tooltips, position differently */
+        .collapsible .tooltip-icon .tooltip-text {
+            bottom: 150%;
+        }
+        
+        /* Ensure table headers have position relative for tooltip positioning */
+        th {
+            position: relative;
+        }
+        
+        /* Add a responsive design for mobile */
+        @media (max-width: 768px) {
+            .scrollable-table {
+                overflow-x: auto;
+            }
+            .scrollable-table table {
+                min-width: 600px;
+            }
+            .collapsible {
+                font-size: 14px;
+                padding: 12px 15px;
+            }
+            .tooltip-icon .tooltip-text {
+                width: 150px;
+            }
+        }
+    </style>
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+    <script src="https://unpkg.com/tippy.js@6"></script>
+</head>
+<body>
+
+    <h2>Database Tables</h2>
+
+    <!-- User Sensitive Information Table -->
+    <div class="table-container">
+        <button class="collapsible">
+            <div class="header-with-tooltip">
+                User Sensitive Information
+                <i class="fas fa-info-circle tooltip-icon" data-tippy-content="Contains personal identification data for all users"></i>
+            </div>
+            <span class="arrow-icon"><i class="fas fa-chevron-down"></i></span>
+        </button>
+        <div class="content">
+            <div class="scrollable-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>User ID <i class="fas fa-info-circle tooltip-icon" data-tippy-content="Unique identifier for each user"></i></th>
+                            <th>First Name <i class="fas fa-info-circle tooltip-icon" data-tippy-content="User's legal first name"></i></th>
+                            <th>Middle Name <i class="fas fa-info-circle tooltip-icon" data-tippy-content="User's middle name (if applicable)"></i></th>
+                            <th>Last Name <i class="fas fa-info-circle tooltip-icon" data-tippy-content="User's legal last name"></i></th>
+                            <th>Date of Birth <i class="fas fa-info-circle tooltip-icon" data-tippy-content="User's date of birth in YYYY-MM-DD format"></i></th>
+                            <th>Passport Issuing Country <i class="fas fa-info-circle tooltip-icon" data-tippy-content="Country that issued the user's passport"></i></th>
+                            <th>Passport Number <i class="fas fa-info-circle tooltip-icon" data-tippy-content="User's passport identification number"></i></th>
+                            <th>Passport Expiry <i class="fas fa-info-circle tooltip-icon" data-tippy-content="Expiration date of the passport in YYYY-MM-DD format"></i></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in user_sensitive_data %}
+                            <tr>
+                                <td>{{ user.user_id }}</td>
+                                <td>{{ user.first_name }}</td>
+                                <td>{{ user.middle_name }}</td>
+                                <td>{{ user.last_name }}</td>
+                                <td>{{ user.date_of_birth }}</td>
+                                <td>{{ user.passport_issuing_country }}</td>
+                                <td>{{ user.passport_number }}</td>
+                                <td>{{ user.passport_expiry }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vehicle Table -->
+    <div class="table-container">
+        <button class="collapsible">
+            <div class="header-with-tooltip">
+                Vehicle
+                <i class="fas fa-info-circle tooltip-icon" data-tippy-content="Information about registered vehicles"></i>
+            </div>
+            <span class="arrow-icon"><i class="fas fa-chevron-down"></i></span>
+        </button>
+        <div class="content">
+            <div class="scrollable-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Vehicle ID <i class="fas fa-info-circle tooltip-icon" data-tippy-content="Unique identifier for each vehicle"></i></th>
+                            <th>Vehicle Number <i class="fas fa-info-circle tooltip-icon" data-tippy-content="Registration number of the vehicle"></i></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for vehicle in vehicle_data %}
+                            <tr>
+                                <td>{{ vehicle.vehicle_id }}</td>
+                                <td>{{ vehicle.vehicle_number }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Vehicle Table -->
+    <div class="table-container">
+        <button class="collapsible">
+            <div class="header-with-tooltip">
+                User Vehicle
+                <i class="fas fa-info-circle tooltip-icon" data-tippy-content="Links users to their registered vehicles"></i>
+            </div>
+            <span class="arrow-icon"><i class="fas fa-chevron-down"></i></span>
+        </button>
+        <div class="content">
+            <div class="scrollable-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>User Vehicle ID <i class="fas fa-info-circle tooltip-icon" data-tippy-content="Unique identifier for user-vehicle relationship"></i></th>
+                            <th>User ID <i class="fas fa-info-circle tooltip-icon" data-tippy-content="Reference to the user who owns the vehicle"></i></th>
+                            <th>Vehicle ID <i class="fas fa-info-circle tooltip-icon" data-tippy-content="Reference to the vehicle owned by the user"></i></th>
+                            <th>User Vehicle Model <i class="fas fa-info-circle tooltip-icon" data-tippy-content="Model name/number of the vehicle"></i></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user_vehicle in user_vehicle_data %}
+                            <tr>
+                                <td>{{ user_vehicle.user_vehicle_id }}</td>
+                                <td>{{ user_vehicle.user_id }}</td>
+                                <td>{{ user_vehicle.vehicle_id }}</td>
+                                <td>{{ user_vehicle.user_vehicle_model }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pass Table -->
+    <div class="table-container">
+        <button class="collapsible">
+            <div class="header-with-tooltip">
+                Pass
+                <i class="fas fa-info-circle tooltip-icon" data-tippy-content="Information about access passes issued to users"></i>
+            </div>
+            <span class="arrow-icon"><i class="fas fa-chevron-down"></i></span>
+        </button>
+        <div class="content">
+            <div class="scrollable-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Pass ID <i class="fas fa-info-circle tooltip-icon" data-tippy-content="Unique identifier for each pass"></i></th>
+                            <th>Creator User ID <i class="fas fa-info-circle tooltip-icon" data-tippy-content="ID of the user who created the pass"></i></th>
+                            <th>Pass Date <i class="fas fa-info-circle tooltip-icon" data-tippy-content="Date when the pass was issued"></i></th>
+                            <th>Expiry Date <i class="fas fa-info-circle tooltip-icon" data-tippy-content="Date and time when the pass expires"></i></th>
+                            <th>Pass Utilized <i class="fas fa-info-circle tooltip-icon" data-tippy-content="Indicates whether the pass has been used"></i></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for pass in pass_data %}
+                            <tr>
+                                <td>{{ pass.pass_id }}</td>
+                                <td>{{ pass.creator_user_id }}</td>
+                                <td>{{ pass.pass_date }}</td>
+                                <td>{{ pass.expiry_datetime }}</td>
+                                <td>{{ pass.pass_utilized }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pass Traveller Table -->
+    <div class="table-container">
+        <button class="collapsible">
+            <div class="header-with-tooltip">
+                Pass Traveller
+                <i class="fas fa-info-circle tooltip-icon" data-tippy-content="Mapping between passes and their travellers"></i>
+            </div>
+            <span class="arrow-icon"><i class="fas fa-chevron-down"></i></span>
+        </button>
+        <div class="content">
+            <div class="scrollable-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Pass Traveller ID <i class="fas fa-info-circle tooltip-icon" data-tippy-content="Unique identifier for pass-traveller relationship"></i></th>
+                            <th>Pass ID <i class="fas fa-info-circle tooltip-icon" data-tippy-content="ID of the pass"></i></th>
+                            <th>User ID <i class="fas fa-info-circle tooltip-icon" data-tippy-content="User ID of the traveller"></i></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for pass_traveller in pass_traveller_data %}
+                            <tr>
+                                <td>{{ pass_traveller.pass_traveller_id }}</td>
+                                <td>{{ pass_traveller.pass_id }}</td>
+                                <td>{{ pass_traveller.user_id }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Preset Table -->
+    <div class="table-container">
+        <button class="collapsible">
+            <div class="header-with-tooltip">
+                Preset
+                <i class="fas fa-info-circle tooltip-icon" data-tippy-content="User-defined presets for quick access"></i>
+            </div>
+            <span class="arrow-icon"><i class="fas fa-chevron-down"></i></span>
+        </button>
+        <div class="content">
+            <div class="scrollable-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Preset ID <i class="fas fa-info-circle tooltip-icon" data-tippy-content="Unique identifier for each preset"></i></th>
+                            <th>Preset Name <i class="fas fa-info-circle tooltip-icon" data-tippy-content="Name given to the preset by the user"></i></th>
+                            <th>User ID <i class="fas fa-info-circle tooltip-icon" data-tippy-content="ID of the user who owns this preset"></i></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for preset in preset_data %}
+                            <tr>
+                                <td>{{ preset.preset_id }}</td>
+                                <td>{{ preset.preset_name }}</td>
+                                <td>{{ preset.user_id }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Preset Traveller Table -->
+    <div class="table-container">
+        <button class="collapsible">
+            <div class="header-with-tooltip">
+                Preset Traveller
+                <i class="fas fa-info-circle tooltip-icon" data-tippy-content="Links presets to specific travellers"></i>
+            </div>
+            <span class="arrow-icon"><i class="fas fa-chevron-down"></i></span>
+        </button>
+        <div class="content">
+            <div class="scrollable-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Preset Traveller ID <i class="fas fa-info-circle tooltip-icon" data-tippy-content="Unique identifier for preset-traveller relationship"></i></th>
+                            <th>Preset ID <i class="fas fa-info-circle tooltip-icon" data-tippy-content="Reference to the preset being used"></i></th>
+                            <th>User ID <i class="fas fa-info-circle tooltip-icon" data-tippy-content="Reference to the traveller user"></i></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for preset_traveller in preset_traveller_data %}
+                            <tr>
+                                <td>{{ preset_traveller.preset_traveller_id }}</td>
+                                <td>{{ preset_traveller.preset_id }}</td>
+                                <td>{{ preset_traveller.user_id }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Traveller Table -->
+    <div class="table-container">
+        <button class="collapsible">
+            <div class="header-with-tooltip">
+                User Traveller
+                <i class="fas fa-info-circle tooltip-icon" data-tippy-content="Links between users and their traveller profiles"></i>
+            </div>
+            <span class="arrow-icon"><i class="fas fa-chevron-down"></i></span>
+        </button>
+        <div class="content">
+            <div class="scrollable-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>User Traveller ID <i class="fas fa-info-circle tooltip-icon" data-tippy-content="Unique identifier for user-traveller relationship"></i></th>
+                            <th>Creator User ID <i class="fas fa-info-circle tooltip-icon" data-tippy-content="ID of the user who created this relationship"></i></th>
+                            <th>Traveller ID <i class="fas fa-info-circle tooltip-icon" data-tippy-content="Reference to the traveller profile"></i></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user_traveller in user_traveller_data %}
+                            <tr>
+                                <td>{{ user_traveller.user_traveller_id }}</td>
+                                <td>{{ user_traveller.creator_user_id }}</td>
+                                <td>{{ user_traveller.traveller_id }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Tippy tooltips
+        tippy('.tooltip-icon', {
+            content: function(reference) {
+                return reference.getAttribute('data-tippy-content');
+            },
+            placement: 'top',
+            arrow: true
+        });
+
+        // Collapsible functionality
+        var coll = document.getElementsByClassName("collapsible");
+        for (var i = 0; i < coll.length; i++) {
+            coll[i].addEventListener("click", function() {
+                this.classList.toggle("active");
+                var content = this.nextElementSibling;
+                if (content.style.maxHeight) {
+                    content.style.maxHeight = null;
+                } else {
+                    content.style.maxHeight = content.scrollHeight + "px";
+                }
+            });
+        }
+    </script>
+
+</body>
+</html>

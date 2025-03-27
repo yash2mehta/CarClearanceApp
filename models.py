@@ -74,7 +74,7 @@ class Preset(db.Model):
 class PresetTraveller(db.Model):
     preset_traveller_id = db.Column(db.Integer, primary_key=True, autoincrement=True) # autonumber
     preset_id = db.Column(db.Integer, db.ForeignKey('preset.preset_id'), nullable=False) # gets the preset
-    user_id = db.Column(db.Integer, db.ForeignKey(UserSensitiveInformation.user_id), nullable=False) # references travelers in the pass, and gets the information from UserSensitiveInformation table
+    user_id = db.Column(db.Integer, db.ForeignKey(UserSensitiveInformation.user_id), nullable=False) # references travelers in the presets, and gets the information from UserSensitiveInformation table
     
 # Stores all travelers that the user has added (doesn't need to be related to preset/pass)
 class UserTraveller(db.Model):
