@@ -2237,19 +2237,23 @@ class DeleteUtilizedPassesResource(Resource):
             db.session.rollback()
             return {"error_code": 400, "message": f"Error deleting utilized passes: {str(e)}"}, 400
 
-@ns_user.route('/create-profile')
+@ns_user.route('/<int:user_id>/create-profile')
 class CreateUserProfileResource(Resource):
     """Create a new user profile."""
 
     @api.expect(user_profile_model)
     @api.response(201, 'User profile created successfully', user_profile_model)
     @api.response(400, 'Invalid data or missing required fields', error_response_model_400)
-    def post(self):
+    def post(self, user_id):
         """Create a new user profile with the provided information."""
         data = request.get_json()
 
         # Create a new user instance
-        new_user = UserSensitiveInformation()
+        new_user = UserSensitiveInformation(user_id)
+
+        if not new_user:
+            return {"error_code": 404, "message": "User not found"}, 404
+
 
         try:
             # Set the user attributes, handling potential None values
