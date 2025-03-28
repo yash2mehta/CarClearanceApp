@@ -1857,9 +1857,9 @@ class UserTravellersResource(Resource):
         # Marshal and return the response with status 200
         response = {
             "creator_user_id": user_id,
-            "travellers": traveller_list
+            "travellers": travellers_list
         }
-        return api.marshal_with(response, user_travellers_model), 200
+        return api.marshal(response, user_travellers_model), 200
 
 @ns_traveller.route('/<int:user_id>/add-traveller')
 class AddTravellerResource(Resource):
@@ -1914,7 +1914,7 @@ class AddTravellerResource(Resource):
             }
         }
 
-        return api.marshal_with(response, user_travellers_model), 201
+        return api.marshal(response, user_travellers_model), 201
 
 @ns_traveller.route('/<int:user_id>/delete-traveller-by-user-id')
 class DeleteTravellerResource(Resource):
