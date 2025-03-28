@@ -415,6 +415,17 @@ pass_history_with_travellers_model = api.model('PassHistoryWithTravellers', {
      })))
  })
  
+# Add this model near the other swagger models
+user_profile_with_id_model = api.model('UserProfileWithId', {
+    'user_id': fields.Integer(required=True, example=1, description="ID of the user"),
+    'first_name': fields.String(description="The first name of the user", example="John"),
+    'middle_name': fields.String(description="The middle name of the user", example="David"),
+    'last_name': fields.String(description="The last name of the user", example="Doe"),
+    'date_of_birth': fields.String(description="The date of birth of the user in YYYY-MM-DD format", example="1990-01-01"),
+    'nationality': fields.String(description="The nationality or passport issuing country of the user", example="American"),
+    'passport_expiry': fields.String(description="The passport expiry date in YYYY-MM-DD format", example="2030-12-31"),
+    'passport_number': fields.String(description="The passport number of the user", example="A12345678")
+})
 
 # -------- Plate Recognizer code --------
 
@@ -2237,70 +2248,72 @@ class DeleteUtilizedPassesResource(Resource):
             db.session.rollback()
             return {"error_code": 400, "message": f"Error deleting utilized passes: {str(e)}"}, 400
 
-@ns_user.route('/<int:user_id>/create-profile')
-class CreateUserProfileResource(Resource):
-    """Create a new user profile."""
+@ns_user.route('/<int:user_id>/update-profile')
+@api.param('user_id', 'The user identifier')
+class UpdateUserProfileResource(Resource):
+    """Update an existing user profile."""
 
     @api.expect(user_profile_model)
-    @api.response(201, 'User profile created successfully', user_profile_model)
-    @api.response(400, 'Invalid data or missing required fields', error_response_model_400)
-    def post(self, user_id):
-        """Create a new user profile with the provided information."""
+    @api.response(200, 'User profile updated successfully', user_profile_with_id_model)
+    @api.response(400, 'Invalid data format', error_response_model_400)
+    @api.response(404, 'User ID not found', error_response_model_404)
+    def put(self, user_id):
+        """Update an existing user profile, preserving current values for empty fields."""
         data = request.get_json()
 
-        # Create a new user instance
-        new_user = UserSensitiveInformation(user_id)
-
-        if not new_user:
+        # Check if user exists
+        user = UserSensitiveInformation.query.get(user_id)
+        if not user:
             return {"error_code": 404, "message": "User not found"}, 404
 
-
         try:
-            # Set the user attributes, handling potential None values
-            new_user.first_name = data.get('first_name')
-            new_user.middle_name = data.get('middle_name')
-            new_user.last_name = data.get('last_name')
-            
-            # Handle date of birth conversion
-            dob = data.get('date_of_birth')
-            if dob:
+            # Update only if new value is provided and not empty
+            if 'first_name' in data and data['first_name']:
+                user.first_name = data['first_name']
+
+            if 'middle_name' in data and data['middle_name']:
+                user.middle_name = data['middle_name']
+
+            if 'last_name' in data and data['last_name']:
+                user.last_name = data['last_name']
+
+            if 'date_of_birth' in data and data['date_of_birth']:
                 try:
-                    new_user.date_of_birth = datetime.strptime(dob, "%Y-%m-%d").date()
+                    user.date_of_birth = datetime.strptime(data['date_of_birth'], "%Y-%m-%d").date()
                 except ValueError:
                     return {"error_code": 400, "message": "Invalid date format for date_of_birth. Use YYYY-MM-DD"}, 400
 
-            new_user.passport_issuing_country = data.get('nationality')
-            
-            # Handle passport expiry conversion
-            passport_expiry = data.get('passport_expiry')
-            if passport_expiry:
+            if 'nationality' in data and data['nationality']:
+                user.passport_issuing_country = data['nationality']
+
+            if 'passport_expiry' in data and data['passport_expiry']:
                 try:
-                    new_user.passport_expiry = datetime.strptime(passport_expiry, "%Y-%m-%d")
+                    user.passport_expiry = datetime.strptime(data['passport_expiry'], "%Y-%m-%d")
                 except ValueError:
                     return {"error_code": 400, "message": "Invalid date format for passport_expiry. Use YYYY-MM-DD"}, 400
 
-            new_user.passport_number = data.get('passport_number')
+            if 'passport_number' in data and data['passport_number']:
+                user.passport_number = data['passport_number']
 
-            # Add and commit the new user to the database
-            db.session.add(new_user)
             db.session.commit()
 
             # Prepare the response data
             response_data = {
-                "first_name": new_user.first_name,
-                "middle_name": new_user.middle_name,
-                "last_name": new_user.last_name,
-                "date_of_birth": new_user.date_of_birth.strftime("%Y-%m-%d") if new_user.date_of_birth else None,
-                "nationality": new_user.passport_issuing_country,
-                "passport_expiry": new_user.passport_expiry.strftime("%Y-%m-%d") if new_user.passport_expiry else None,
-                "passport_number": new_user.passport_number
+                "user_id": user_id,
+                "first_name": user.first_name,
+                "middle_name": user.middle_name,
+                "last_name": user.last_name,
+                "date_of_birth": user.date_of_birth.strftime("%Y-%m-%d") if user.date_of_birth else None,
+                "nationality": user.passport_issuing_country,
+                "passport_expiry": user.passport_expiry.strftime("%Y-%m-%d") if user.passport_expiry else None,
+                "passport_number": user.passport_number
             }
 
-            return api.marshal(response_data, user_profile_model), 201
+            return api.marshal(response_data, user_profile_with_id_model), 200
 
         except Exception as e:
             db.session.rollback()
-            return {"error_code": 400, "message": f"Error creating user profile: {str(e)}"}, 400
+            return {"error_code": 400, "message": f"Error updating user profile: {str(e)}"}, 400
 
 if __name__ == '__main__':
 
