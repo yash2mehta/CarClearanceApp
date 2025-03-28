@@ -1652,7 +1652,7 @@ class ManagePassportExpiryResource(Resource):
         if not user:
             return {"error_code": 404, "message": "User not found"}, 404
         response = {"passport_expiry": user.passport_expiry.strftime("%Y-%m-%d")}
-        return api.marshal_with(response, passport_expiry_model), 200
+        return api.marshal(response, passport_expiry_model), 200
 
     @api.expect(passport_expiry_model)
     @api.response(200, 'Passport expiry updated successfully', success_message_model)
@@ -1684,7 +1684,7 @@ class ManageUserPassportNumberResource(Resource):
         if not user:
             return {"error_code": 404, "message": "User not found"}, 404
         response = {"passport_number": user.passport_number}
-        return api.marshal_with(response, passport_number_model), 200
+        return api.marshal(response, passport_number_model), 200
 
     @api.expect(passport_number_model)
     @api.response(200, 'Passport number updated successfully', success_message_model)
@@ -1779,7 +1779,7 @@ class UserTravellersResource(Resource):
             "creator_user_id": user_id,
             "travellers": traveller_list
         }
-        return api.marshal_with(response, user_travellers_model), 200
+        return api.marshal(response, user_travellers_model), 200
 
 @ns_traveller.route('/<int:user_id>/add-traveller')
 class AddTravellerResource(Resource):
@@ -1834,7 +1834,7 @@ class AddTravellerResource(Resource):
             }
         }
 
-        return api.marshal_with(response, user_travellers_model), 201
+        return api.marshal(response, user_travellers_model), 201
 
 @ns_traveller.route('/<int:user_id>/delete-traveller-by-user-id')
 class DeleteTravellerResource(Resource):
