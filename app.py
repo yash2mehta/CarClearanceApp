@@ -2237,6 +2237,67 @@ class DeleteUtilizedPassesResource(Resource):
             db.session.rollback()
             return {"error_code": 400, "message": f"Error deleting utilized passes: {str(e)}"}, 400
 
+@ns_user.route('/create-profile')
+class CreateUserProfileResource(Resource):
+    """Create a new user profile."""
+
+    @api.expect(user_profile_model)
+    @api.response(201, 'User profile created successfully', user_profile_model)
+    @api.response(400, 'Invalid data or missing required fields', error_response_model_400)
+    def post(self):
+        """Create a new user profile with the provided information."""
+        data = request.get_json()
+
+        # Create a new user instance
+        new_user = UserSensitiveInformation()
+
+        try:
+            # Set the user attributes, handling potential None values
+            new_user.first_name = data.get('first_name')
+            new_user.middle_name = data.get('middle_name')
+            new_user.last_name = data.get('last_name')
+            
+            # Handle date of birth conversion
+            dob = data.get('date_of_birth')
+            if dob:
+                try:
+                    new_user.date_of_birth = datetime.strptime(dob, "%Y-%m-%d").date()
+                except ValueError:
+                    return {"error_code": 400, "message": "Invalid date format for date_of_birth. Use YYYY-MM-DD"}, 400
+
+            new_user.passport_issuing_country = data.get('nationality')
+            
+            # Handle passport expiry conversion
+            passport_expiry = data.get('passport_expiry')
+            if passport_expiry:
+                try:
+                    new_user.passport_expiry = datetime.strptime(passport_expiry, "%Y-%m-%d")
+                except ValueError:
+                    return {"error_code": 400, "message": "Invalid date format for passport_expiry. Use YYYY-MM-DD"}, 400
+
+            new_user.passport_number = data.get('passport_number')
+
+            # Add and commit the new user to the database
+            db.session.add(new_user)
+            db.session.commit()
+
+            # Prepare the response data
+            response_data = {
+                "first_name": new_user.first_name,
+                "middle_name": new_user.middle_name,
+                "last_name": new_user.last_name,
+                "date_of_birth": new_user.date_of_birth.strftime("%Y-%m-%d") if new_user.date_of_birth else None,
+                "nationality": new_user.passport_issuing_country,
+                "passport_expiry": new_user.passport_expiry.strftime("%Y-%m-%d") if new_user.passport_expiry else None,
+                "passport_number": new_user.passport_number
+            }
+
+            return api.marshal(response_data, user_profile_model), 201
+
+        except Exception as e:
+            db.session.rollback()
+            return {"error_code": 400, "message": f"Error creating user profile: {str(e)}"}, 400
+
 if __name__ == '__main__':
 
     with app.app_context():
