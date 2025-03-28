@@ -1519,10 +1519,61 @@ class UserPassHistoryWithTravellersResource(Resource):
         if not user:
             return {"error_code": 404, "message": "User not found"}, 404
 
-        data = request.get_json()
-        user.first_name = data.get("first_name", user.first_name)
-        db.session.commit()
-        return {"message": "First name updated successfully"}, 200
+        # 2. Fetch all utilized passes created by the user
+        utilized_passes = (
+            db.session.query(
+                Pass.pass_id,
+                Pass.pass_date,
+                Pass.expiry_datetime
+            )
+            .filter(Pass.creator_user_id == user_id, Pass.pass_utilized == True)
+            .all()
+        )
+
+        # 3. Convert results into a list of passes with traveller details
+        passes_list = []
+        for p in utilized_passes:
+            # Get travellers for this pass
+            travellers = (
+                db.session.query(
+                    UserSensitiveInformation.user_id,
+                    UserSensitiveInformation.first_name,
+                    UserSensitiveInformation.middle_name,
+                    UserSensitiveInformation.last_name,
+                    UserSensitiveInformation.passport_number
+                )
+                .join(PassTraveller, UserSensitiveInformation.user_id == PassTraveller.user_id)
+                .filter(PassTraveller.pass_id == p.pass_id)
+                .all()
+            )
+
+            # Convert traveller data to list of dicts
+            travellers_list = [
+                {
+                    "user_id": t.user_id,
+                    "first_name": t.first_name,
+                    "middle_name": t.middle_name,
+                    "last_name": t.last_name,
+                    "passport_number": t.passport_number
+                }
+                for t in travellers
+            ]
+
+            # Add pass with its travellers to the list
+            passes_list.append({
+                "pass_id": p.pass_id,
+                "pass_date": p.pass_date,
+                "expiry_datetime": p.expiry_datetime,
+                "travellers": travellers_list
+            })
+
+        response = {
+            "user_id": user_id,
+            "passes_utilized": passes_list
+        }
+
+        # 4. Return response with user passes and traveller details
+        return api.marshal(response, pass_history_with_travellers_model), 200
 
 @ns_user.route('/<int:user_id>/middle-name')
 class ManageUserMiddleNameResource(Resource):
