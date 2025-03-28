@@ -1519,6 +1519,250 @@ class UserPassHistoryWithTravellersResource(Resource):
         if not user:
             return {"error_code": 404, "message": "User not found"}, 404
 
+        data = request.get_json()
+        user.first_name = data.get("first_name", user.first_name)
+        db.session.commit()
+        return {"message": "First name updated successfully"}, 200
+
+@ns_user.route('/<int:user_id>/middle-name')
+class ManageUserMiddleNameResource(Resource):
+    """Get or update the middle name of the user."""
+
+    @api.response(200, 'Middle name retrieved successfully', middle_name_model)
+    @api.response(404, 'User not found', error_response_model_404)
+    def get(self, user_id):
+        """Retrieve the middle name of the user."""
+        user = UserSensitiveInformation.query.get(user_id)
+        if not user:
+            return {"error_code": 404, "message": "User not found"}, 404
+        
+        response = {"middle_name": user.middle_name}
+        return api.marshal(response, middle_name_model), 200
+
+    @api.expect(middle_name_model)
+    @api.response(200, 'Middle name updated successfully', success_message_model)
+    @api.response(404, 'User not found', error_response_model_404)
+    def post(self, user_id):
+        """Update the middle name of the user."""
+        user = UserSensitiveInformation.query.get(user_id)
+        if not user:
+            return {"error_code": 404, "message": "User not found"}, 404
+
+        data = request.get_json()
+        user.middle_name = data.get("middle_name", user.middle_name)
+        db.session.commit()
+        return {"message": "Middle name updated successfully"}, 200
+
+
+@ns_user.route('/<int:user_id>/last-name')
+class ManageUserLastNameResource(Resource):
+    """Get or update the last name of the user."""
+    
+    @api.response(200, 'Last name retrieved successfully', last_name_model)
+    @api.response(404, 'User not found', error_response_model_404)
+    def get(self, user_id):
+        """Retrieve the last name of the user."""
+        user = UserSensitiveInformation.query.get(user_id)
+        if not user:
+            return {"error_code": 404, "message": "User not found"}, 404
+        response = {"last_name": user.last_name}
+        return api.marshal(response, last_name_model), 200
+
+    @api.expect(last_name_model)
+    @api.response(200, 'Last name updated successfully', success_message_model)
+    @api.response(404, 'User not found', error_response_model_404)
+    def post(self, user_id):
+        """Update the last name of the user."""
+        user = UserSensitiveInformation.query.get(user_id)
+        if not user:
+            return {"error_code": 404, "message": "User not found"}, 404
+
+        data = request.get_json()
+        user.last_name = data.get("last_name", user.last_name)
+        db.session.commit()
+        return {"message": "Last name updated successfully"}, 200
+
+@ns_user.route('/<int:user_id>/dob')
+class ManageUserDobResource(Resource):
+    """Get or update the date of birth of the user."""
+
+    @api.response(200, 'Date of birth retrieved successfully', dob_model)
+    @api.response(404, 'User not found', error_response_model_404)
+    def get(self, user_id):
+        """Retrieve the date of birth of the user."""
+        user = UserSensitiveInformation.query.get(user_id)
+        if not user:
+            return {"error_code": 404, "message": "User not found"}, 404
+        response = {"date_of_birth": user.date_of_birth.strftime("%Y-%m-%d")}
+        return api.marshal(response, dob_model), 200
+
+    @api.expect(dob_model)
+    @api.response(200, 'Date of birth updated successfully', success_message_model)
+    @api.response(400, 'Invalid date format. Use YYYY-MM-DD', error_response_model_400)
+    @api.response(404, 'User not found', error_response_model_404)
+    def post(self, user_id):
+        """Update the date of birth of the user."""
+        user = UserSensitiveInformation.query.get(user_id)
+        if not user:
+            return {"error_code": 404, "message": "User not found"}, 404
+
+        data = request.get_json()
+        try:
+            user.date_of_birth = datetime.strptime(data.get("date_of_birth"), "%Y-%m-%d").date()
+            db.session.commit()
+            return {"message": "Date of Birth updated successfully"}, 200
+        except ValueError:
+            return {"error_code": 400, "message": "Invalid date format. Use YYYY-MM-DD"}, 400
+
+@ns_user.route('/<int:user_id>/nationality')
+class ManageUserNationalityResource(Resource):
+    """Get or update the nationality (passport issuing country) of the user."""
+
+    @api.response(200, 'Nationality retrieved successfully', nationality_model)
+    @api.response(404, 'User not found', error_response_model_404)
+    def get(self, user_id):
+        """Retrieve the nationality (passport issuing country) of the user."""
+        user = UserSensitiveInformation.query.get(user_id)
+        if not user:
+            return {"error_code": 404, "message": "User not found"}, 404
+        response = {"nationality": user.passport_issuing_country}
+        return api.marshal(response, nationality_model), 200
+
+    @api.expect(nationality_model)
+    @api.response(200, 'Nationality updated successfully', success_message_model)
+    @api.response(404, 'User not found', error_response_model_404)
+    def post(self, user_id):
+        """Update the nationality (passport issuing country) of the user."""
+        user = UserSensitiveInformation.query.get(user_id)
+        if not user:
+            return {"error_code": 404, "message": "User not found"}, 404
+
+        data = request.get_json()
+        user.passport_issuing_country = data.get("nationality", user.passport_issuing_country)
+        db.session.commit()
+        return {"message": "Nationality updated successfully"}, 200
+
+@ns_user.route('/<int:user_id>/passport-expiry')
+class ManagePassportExpiryResource(Resource):
+    """Get or update the passport expiry date of the user."""
+
+    @api.response(200, 'Passport expiry retrieved successfully', passport_expiry_model)
+    @api.response(404, 'User not found', error_response_model_404)
+    def get(self, user_id):
+        """Retrieve the passport expiry date of the user."""
+        user = UserSensitiveInformation.query.get(user_id)
+        if not user:
+            return {"error_code": 404, "message": "User not found"}, 404
+        response = {"passport_expiry": user.passport_expiry.strftime("%Y-%m-%d")}
+        return api.marshal(response, passport_expiry_model), 200
+
+    @api.expect(passport_expiry_model)
+    @api.response(200, 'Passport expiry updated successfully', success_message_model)
+    @api.response(400, 'Invalid date format. Use YYYY-MM-DD', error_response_model_400)
+    @api.response(404, 'User not found', error_response_model_404)
+    def post(self, user_id):
+        """Update the passport expiry date of the user."""
+        user = UserSensitiveInformation.query.get(user_id)
+        if not user:
+            return {"error_code": 404, "message": "User not found"}, 404
+
+        data = request.get_json()
+        try:
+            user.passport_expiry = datetime.strptime(data.get("passport_expiry"), "%Y-%m-%d")
+            db.session.commit()
+            return {"message": "Passport expiry date updated successfully"}, 200
+        except ValueError:
+            return {"error_code": 400, "message": "Invalid date format. Use YYYY-MM-DD"}, 400
+
+@ns_user.route('/<int:user_id>/passport-number')
+class ManageUserPassportNumberResource(Resource):
+    """Get or update the passport number of the user."""
+
+    @api.response(200, 'Passport number retrieved successfully', passport_number_model)
+    @api.response(404, 'User not found', error_response_model_404)
+    def get(self, user_id):
+        """Retrieve the passport number of the user."""
+        user = UserSensitiveInformation.query.get(user_id)
+        if not user:
+            return {"error_code": 404, "message": "User not found"}, 404
+        response = {"passport_number": user.passport_number}
+        return api.marshal(response, passport_number_model), 200
+
+    @api.expect(passport_number_model)
+    @api.response(200, 'Passport number updated successfully', success_message_model)
+    @api.response(400, 'Invalid passport number format', error_response_model_400)
+    @api.response(404, 'User not found', error_response_model_404)
+    def post(self, user_id):
+        """Update the passport number of the user."""
+        user = UserSensitiveInformation.query.get(user_id)
+        if not user:
+            return {"error_code": 404, "message": "User not found"}, 404
+
+        data = request.get_json()
+        passport_number = data.get("passport_number")
+        
+        if not passport_number:
+            return {"error_code": 400, "message": "Passport number is required"}, 400
+        
+        user.passport_number = passport_number
+        db.session.commit()
+        
+        return {"message": "Passport number updated successfully"}, 200
+
+@ns_user.route('/<int:user_id>/profile')
+class UserProfileResource(Resource):
+    """Retrieve the profile of the user."""
+
+    @api.response(200, 'User profile retrieved successfully', user_profile_model)
+    @api.response(404, 'User not found', error_response_model_404)
+    def get(self, user_id):
+        """Get all the information of the user."""
+        user = UserSensitiveInformation.query.get(user_id)
+
+        if not user:
+            return {"error_code": 404, "message": "User not found"}, 404
+
+        # Prepare the profile data, ensuring that None is safely returned for optional fields.
+        profile_data = {
+            "first_name": user.first_name if user.first_name else None,
+            "middle_name": user.middle_name if user.middle_name else None,
+            "last_name": user.last_name if user.last_name else None,
+            "date_of_birth": user.date_of_birth.strftime("%Y-%m-%d") if user.date_of_birth else None,
+            "nationality": user.passport_issuing_country if user.passport_issuing_country else None,
+            "passport_expiry": user.passport_expiry.strftime("%Y-%m-%d") if user.passport_expiry else None,
+            "passport_number": user.passport_number if user.passport_number else None
+        }
+
+        return api.marshal(profile_data, user_profile_model), 200
+
+@ns_traveller.route('/<int:user_id>/get-travellers')
+class UserTravellersResource(Resource):
+    """Get all travellers (that are not associated with pass/preset) for a user."""
+
+    @api.response(200, 'Travellers retrieved successfully', user_travellers_model)
+    @api.response(404, 'User not found', error_response_model_404)
+    @api.response(400, 'Bad request due to incorrect data', error_response_model_400)
+    def get(self, user_id):
+        """Retrieve all travellers added by the user that are not associated with a pass or preset."""
+        
+        # Check if the creator user exists
+        creator = UserSensitiveInformation.query.get(user_id)
+        if not creator:
+            return {"error_code": 404, "message": "User not found"}, 404
+
+        # Query all travellers added by the creator
+        travellers = (
+            db.session.query(
+                UserSensitiveInformation.user_id,
+                UserSensitiveInformation.first_name,
+                UserSensitiveInformation.middle_name,
+                UserSensitiveInformation.last_name,
+                UserSensitiveInformation.passport_number
+            )
+            .join(UserTraveller, UserSensitiveInformation.user_id == UserTraveller.traveller_id)
+            .filter(UserTraveller.creator_user_id == user_id)
+            .all()
+        )
         # 2. Fetch all utilized passes created by the user
         utilized_passes = (
             db.session.query(
@@ -1559,14 +1803,281 @@ class UserPassHistoryWithTravellersResource(Resource):
             for t in travellers
         ]
         
-            # Add pass with its travellers to the list
-            passes_list.append({
-                "pass_id": p.pass_id,
-                "pass_date": p.pass_date,
-                "expiry_datetime": p.expiry_datetime,
-                "travellers": travellers_list
-            })
+        # Marshal and return the response with status 200
+        response = {
+            "creator_user_id": user_id,
+            "travellers": traveller_list
+        }
+        return api.marshal_with(response, user_travellers_model), 200
 
+@ns_traveller.route('/<int:user_id>/add-traveller')
+class AddTravellerResource(Resource):
+    """Add a traveller (not associated with pass/preset) for a user."""
+
+    @api.expect(passport_number_model)
+    @api.response(201, 'Traveller added successfully', user_travellers_model)
+    @api.response(400, 'Required fields missing or data already in database', error_response_model_400)
+    @api.response(404, 'Resource not found', error_response_model_404)
+    def post(self, user_id):    
+        """Add a traveller for the user."""
+
+        # Check if the creator user exists
+        creator = UserSensitiveInformation.query.get(user_id)
+        if not creator:
+            return {"error_code": 404, "message": "Creator user not found"}, 404
+
+        # Get JSON data
+        data = request.get_json()
+        passport_number = data.get("passport_number")
+
+        if not passport_number:
+            return {"error_code": 400, "message": "Passport number is required"}, 400
+
+        # Find the traveller by passport number
+        traveller = UserSensitiveInformation.query.filter_by(passport_number=passport_number).first()
+        
+        if not traveller:
+            return {"error_code": 404, "message": "Traveller with this passport number not found"}, 404
+
+        traveller_id = traveller.user_id
+
+        # Check if traveller is already added by this user
+        existing_entry = UserTraveller.query.filter_by(creator_user_id=user_id, traveller_id=traveller_id).first()
+        if existing_entry:
+            return {"error_code": 400, "message": "Traveller already added"}, 400
+
+        # Add to UserTraveller table
+        new_traveller = UserTraveller(creator_user_id=user_id, traveller_id=traveller_id)
+        db.session.add(new_traveller)
+        db.session.commit()
+
+        # Create a response that matches the expected model
+        response = {
+            "creator_user_id": user_id,
+            "travellers": {
+                "user_id": traveller.user_id,
+                "first_name": traveller.first_name,
+                "middle_name": traveller.middle_name,
+                "last_name": traveller.last_name,
+                "passport_number": traveller.passport_number
+            }
+        }
+
+        return api.marshal_with(response, user_travellers_model), 201
+
+@ns_traveller.route('/<int:user_id>/delete-traveller-by-user-id')
+class DeleteTravellerResource(Resource):
+    """Delete a traveller from a user's traveller list based on the traveller's user id """
+
+    @api.expect(delete_traveller_model)
+    @api.response(200, 'Traveller deleted successfully', success_message_model)
+    @api.response(400, 'Required fields missing', error_response_model_400)
+    @api.response(404, 'User or traveller not found', error_response_model_404)
+    def delete(self, user_id):
+        """Delete a traveller from the user's list of travellers."""
+        
+        # Check if the managing user exists
+        creator_user_id = UserSensitiveInformation.query.get(user_id)
+        if not creator_user_id:
+            return {"error_code": 404, "message": "Creator user id not found"}, 404
+
+        # Get JSON data
+        data = request.get_json()
+        traveller_user_id = data.get("traveller_user_id")
+
+        if not traveller_user_id:
+            return {"error_code": 400, "message": "Traveller user ID is required"}, 400
+
+        # Check if the traveller exists
+        traveller = UserSensitiveInformation.query.get(traveller_user_id)
+        if not traveller:
+            return {"error_code": 404, "message": "Traveller not found"}, 404
+
+        # Find and delete the UserTraveller entry
+        user_traveller = UserTraveller.query.filter_by(
+            creator_user_id=user_id,
+            traveller_id=traveller_user_id
+        ).first()
+
+        if not user_traveller:
+            return {
+                "error_code": 404, 
+                "message": "This traveller is not in your traveller list"
+            }, 404
+
+        # Delete the entry
+        db.session.delete(user_traveller)
+        db.session.commit()
+
+        return {"message": "Traveller deleted successfully"}, 200
+
+@ns_traveller.route('/<int:user_id>/delete-traveller-by-passport')
+class DeleteTravellerByPassportResource(Resource):
+    """Delete a traveller from a user's traveller list based on the traveller's passport number"""
+
+    @api.expect(delete_traveller_by_passport_model)
+    @api.response(200, 'Traveller deleted successfully', success_message_model)
+    @api.response(400, 'Required fields missing', error_response_model_400)
+    @api.response(404, 'User or traveller not found', error_response_model_404)
+    def delete(self, user_id):
+        """Delete a traveller from the user's list of travellers by passport number."""
+        
+        # Check if the managing user exists
+        creator_user = UserSensitiveInformation.query.get(user_id)
+        if not creator_user:
+            return {"error_code": 404, "message": "Creator user not found"}, 404
+
+        # Get JSON data
+        data = request.get_json()
+        passport_number = data.get("passport_number")
+
+        if not passport_number:
+            return {"error_code": 400, "message": "Passport number is required"}, 400
+
+        # Find the traveller by passport number
+        traveller = UserSensitiveInformation.query.filter_by(passport_number=passport_number).first()
+        if not traveller:
+            return {"error_code": 404, "message": "Traveller with this passport number not found"}, 404
+
+        traveller_id = traveller.user_id
+
+        # Find and delete the UserTraveller entry
+        user_traveller = UserTraveller.query.filter_by(
+            creator_user_id=user_id,
+            traveller_id=traveller_id
+        ).first()
+
+        if not user_traveller:
+            return {
+                "error_code": 404, 
+                "message": "This traveller is not in your traveller list"
+            }, 404
+
+        # Delete the entry
+        db.session.delete(user_traveller)
+        db.session.commit()
+
+        return {"message": f"Traveller with passport number {passport_number} deleted successfully"}, 200
+
+@ns_preset.route('/<int:user_id>/delete-preset')
+class DeletePresetResource(Resource):
+    """Delete a preset and its associated traveller relationships, through its preset id"""
+
+    @api.expect(delete_preset_model)
+    @api.response(200, 'Preset deleted successfully', success_message_model)
+    @api.response(400, 'Required fields missing', error_response_model_400)
+    @api.response(404, 'User, preset not found, or preset does not belong to user', error_response_model_404)
+    def delete(self, user_id):
+        """Delete a preset and its associated traveller relationships."""
+        
+        # Check if the user exists
+        user = UserSensitiveInformation.query.get(user_id)
+        if not user:
+            return {"error_code": 404, "message": "User not found"}, 404
+
+        # Get JSON data
+        data = request.get_json()
+        preset_id = data.get("preset_id")
+
+        if not preset_id:
+            return {"error_code": 400, "message": "Preset ID is required"}, 400
+
+        # Check if the preset exists
+        preset = Preset.query.get(preset_id)
+        if not preset:
+            return {"error_code": 404, "message": "Preset not found"}, 404
+
+        # Check if the preset belongs to the user
+        if preset.user_id != user_id:
+            return {
+                "error_code": 404, 
+                "message": "This preset does not belong to the specified user"
+            }, 404
+
+        try:
+            # First delete all associated PresetTraveller entries
+            PresetTraveller.query.filter_by(preset_id=preset_id).delete()
+            
+            # Then delete the preset itself
+            db.session.delete(preset)
+            db.session.commit()
+
+            return {"message": f"Preset with ID {preset_id} has been deleted successfully"}, 200
+
+        except Exception as e:
+            db.session.rollback()
+            return {"error_code": 400, "message": f"Error deleting preset: {str(e)}"}, 400
+
+@ns_pass.route('/<int:user_id>/update-pass-travellers')
+class UpdatePassTravellersResource(Resource):
+    """Update the travellers associated with a pass."""
+
+    @api.expect(update_pass_travellers_model)
+    @api.response(200, 'Pass travellers updated successfully', pass_response_model_2)
+    @api.response(400, 'Required fields missing', error_response_model_400)
+    @api.response(404, 'User, pass or traveller not found, or pass does not belong to user', error_response_model_404)
+    def put(self, user_id):
+        """Update the travellers in a pass through a list of user IDs."""
+        
+        # Check if the user exists
+        user = UserSensitiveInformation.query.get(user_id)
+        if not user:
+            return {"error_code": 404, "message": "User not found"}, 404
+        # Get JSON data
+        data = request.get_json()
+        pass_id = data.get("pass_id")
+        traveller_ids = data.get("traveller_ids", [])
+
+        # Validate required fields
+        if not pass_id:
+            return {"error_code": 400, "message": "Pass ID is required"}, 400
+        
+        if not isinstance(traveller_ids, list):
+            return {"error_code": 400, "message": "traveller_ids must be a list"}, 400
+
+        # Check if the pass exists
+        pass_entry = Pass.query.get(pass_id)
+        if not pass_entry:
+            return {"error_code": 404, "message": "Pass not found"}, 404
+
+        # Check if the pass belongs to the user
+        if pass_entry.creator_user_id != user_id:
+            return {
+                "error_code": 404, 
+                "message": "This pass does not belong to the specified user"
+            }, 404
+
+        # Check if all traveller IDs exist
+        for traveller_id in traveller_ids:
+            traveller = UserSensitiveInformation.query.get(traveller_id)
+            if not traveller:
+                return {"error_code": 404, "message": f"Traveller with ID {traveller_id} not found"}, 404
+
+        try:
+            # Remove all existing traveller associations for this pass
+            PassTraveller.query.filter_by(pass_id=pass_id).delete()
+            
+            # Create new associations for all travellers in the list
+            travellers_added = []
+            for traveller_id in traveller_ids:
+                # Add to PassTraveller table
+                pass_traveller = PassTraveller(pass_id=pass_id, user_id=traveller_id)
+                db.session.add(pass_traveller)
+                
+                # Get traveller info for response
+                traveller = UserSensitiveInformation.query.get(traveller_id)
+                travellers_added.append({
+                    "user_id": traveller_id,
+                    "first_name": traveller.first_name,
+                    "middle_name": traveller.middle_name,
+                    "last_name": traveller.last_name,
+                    "passport_number": traveller.passport_number
+                })
+            
+            # Commit all changes
+            db.session.commit()
+
+            # Prepare response
             response = {
             "user_id": user_id,
             "passes_utilized": passes_list
