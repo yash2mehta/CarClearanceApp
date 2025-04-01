@@ -427,6 +427,34 @@ user_profile_with_id_model = api.model('UserProfileWithId', {
     'passport_number': fields.String(description="The passport number of the user", example="A12345678")
 })
 
+# First, define the models for request and response
+name_by_passport_request_model = api.model('NameByPassportRequest', {
+    'passport_number': fields.String(
+        required=True,
+        description="The passport number to search for",
+        example="A12345678"
+    )
+})
+
+name_by_passport_response_model = api.model('NameByPassportResponse', {
+    'first_name': fields.String(
+        description="First name of the person",
+        example="John"
+    ),
+    'middle_name': fields.String(
+        description="Middle name of the person",
+        example="David"
+    ),
+    'last_name': fields.String(
+        description="Last name of the person",
+        example="Smith"
+    ),
+    'full_name': fields.String(
+        description="Combined full name",
+        example="John David Smith"
+    )
+})
+
 # -------- Plate Recognizer code --------
 
 # Defines the route for Homepage (consisting of Image Upload)
@@ -1760,6 +1788,54 @@ class ManageUserLastNameResource(Resource):
         db.session.commit()
         return {"message": "Last name updated successfully"}, 200
 
+@ns_user.route('/<int:user_id>/retrieve-name-by-passport')
+class RetrieveNameByPassportResource(Resource):
+    """Retrieve name information based on passport number."""
+
+    @api.expect(name_by_passport_request_model)
+    @api.response(200, 'Success', name_by_passport_response_model)
+    @api.response(400, 'Missing passport number', error_response_model_400)
+    @api.response(404, 'User or passport not found', error_response_model_404)
+    def post(self, user_id):
+        """Retrieve first name, middle name, last name and full name by passport number."""
+        
+        # Check if the user exists
+        user = UserSensitiveInformation.query.get(user_id)
+        if not user:
+            return {"error_code": 404, "message": "User not found"}, 404
+
+        # Get JSON data
+        data = request.get_json()
+        passport_number = data.get("passport_number")
+
+        if not passport_number:
+            return {"error_code": 400, "message": "Passport number is required"}, 400
+
+        # Find the person by passport number
+        person = UserSensitiveInformation.query.filter_by(passport_number=passport_number).first()
+        if not person:
+            return {"error_code": 404, "message": "Person with this passport number not found"}, 404
+
+        # Construct full name
+        name_parts = []
+        if person.first_name:
+            name_parts.append(person.first_name)
+        if person.middle_name:
+            name_parts.append(person.middle_name)
+        if person.last_name:
+            name_parts.append(person.last_name)
+        
+        full_name = " ".join(name_parts)
+
+        # Prepare response
+        response = {
+            "first_name": person.first_name,
+            "middle_name": person.middle_name,
+            "last_name": person.last_name,
+            "full_name": full_name
+        }
+
+        return api.marshal(response, name_by_passport_response_model), 200
 @ns_user.route('/<int:user_id>/dob')
 class ManageUserDobResource(Resource):
     """Get or update the date of birth of the user."""
