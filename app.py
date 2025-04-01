@@ -455,6 +455,21 @@ name_by_passport_response_model = api.model('NameByPassportResponse', {
     )
 })
 
+# First, add the new model for the request
+update_preset_travellers_passport_model = api.model('UpdatePresetTravellersPassport', {
+    'preset_id': fields.Integer(
+        required=True,
+        description="The ID of the preset to update",
+        example=2
+    ),
+    'passport_numbers': fields.List(
+        fields.String,
+        required=True,
+        description="List of passport numbers to be associated with the preset",
+        example=["A12345678", "B87654321"]
+    )
+})
+
 # -------- Plate Recognizer code --------
 
 # Defines the route for Homepage (consisting of Image Upload)
@@ -1428,6 +1443,94 @@ class UpdatePresetResource(Resource):
         except Exception as e:
             db.session.rollback()
             return {"error_code": 400, "message": f"Error updating preset: {str(e)}"}, 400
+
+@ns_preset.route('/<int:user_id>/update-preset-travellers-passport')
+class UpdatePresetTravellersPassportResource(Resource):
+    """Update the travellers associated with a preset through a list of passport numbers."""
+
+    @api.expect(update_preset_travellers_passport_model)
+    @api.response(200, 'Preset travellers updated successfully', preset_response_model)
+    @api.response(400, 'Required fields missing', error_response_model_400)
+    @api.response(404, 'User, preset or traveller not found, or preset does not belong to user', error_response_model_404)
+    def put(self, user_id):
+        """Update the travellers in a preset through a list of passport numbers."""
+        
+        # Check if the user exists
+        user = UserSensitiveInformation.query.get(user_id)
+        if not user:
+            return {"error_code": 404, "message": "User not found"}, 404
+
+        # Get JSON data
+        data = request.get_json()
+        preset_id = data.get("preset_id")
+        passport_numbers = data.get("passport_numbers", [])
+
+        # Validate required fields
+        if not preset_id:
+            return {"error_code": 400, "message": "Preset ID is required"}, 400
+        
+        if not isinstance(passport_numbers, list):
+            return {"error_code": 400, "message": "passport_numbers must be a list"}, 400
+
+        # Check if the preset exists
+        preset = Preset.query.get(preset_id)
+        if not preset:
+            return {"error_code": 404, "message": "Preset not found"}, 404
+
+        # Check if the preset belongs to the user
+        if preset.user_id != user_id:
+            return {
+                "error_code": 404, 
+                "message": "This preset does not belong to the specified user"
+            }, 404
+
+        # Find all travellers by passport numbers and verify they exist
+        travellers = []
+        for passport_number in passport_numbers:
+            traveller = UserSensitiveInformation.query.filter_by(passport_number=passport_number).first()
+            if not traveller:
+                return {
+                    "error_code": 404, 
+                    "message": f"Traveller with passport number {passport_number} not found"
+                }, 404
+            travellers.append(traveller)
+
+        try:
+            # Remove all existing traveller associations for this preset
+            PresetTraveller.query.filter_by(preset_id=preset_id).delete()
+            
+            # Create new associations for all travellers in the list
+            travellers_added = []
+            for traveller in travellers:
+                # Add to PresetTraveller table
+                preset_traveller = PresetTraveller(preset_id=preset_id, user_id=traveller.user_id)
+                db.session.add(preset_traveller)
+                
+                # Add to response list
+                travellers_added.append({
+                    "user_id": traveller.user_id,
+                    "first_name": traveller.first_name,
+                    "middle_name": traveller.middle_name,
+                    "last_name": traveller.last_name,
+                    "passport_number": traveller.passport_number
+                })
+            
+            # Commit all changes
+            db.session.commit()
+
+            # Prepare response
+            response = {
+                "preset_id": preset_id,
+                "preset_name": preset.preset_name,
+                "created_by_user_id": user_id,
+                "travellers_added": travellers_added
+            }
+
+            return api.marshal(response, preset_response_model), 200
+
+        except Exception as e:
+            db.session.rollback()
+            return {"error_code": 400, "message": f"Error updating preset travellers: {str(e)}"}, 400
 
 @ns_pass.route('/<int:user_id>/passes')
 class UserPassesResource(Resource):
