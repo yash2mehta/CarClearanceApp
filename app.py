@@ -1788,7 +1788,7 @@ class ManageUserLastNameResource(Resource):
         db.session.commit()
         return {"message": "Last name updated successfully"}, 200
 
-@ns_user.route('/<int:user_id>/retrieve-name-by-passport')
+@ns_user.route('/retrieve-name-by-passport')
 class RetrieveNameByPassportResource(Resource):
     """Retrieve name information based on passport number."""
 
@@ -1796,13 +1796,8 @@ class RetrieveNameByPassportResource(Resource):
     @api.response(200, 'Success', name_by_passport_response_model)
     @api.response(400, 'Missing passport number', error_response_model_400)
     @api.response(404, 'User or passport not found', error_response_model_404)
-    def post(self, user_id):
+    def post(self):
         """Retrieve first name, middle name, last name and full name by passport number."""
-        
-        # Check if the user exists
-        user = UserSensitiveInformation.query.get(user_id)
-        if not user:
-            return {"error_code": 404, "message": "User not found"}, 404
 
         # Get JSON data
         data = request.get_json()
