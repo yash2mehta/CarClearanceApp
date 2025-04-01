@@ -2576,10 +2576,33 @@ class UpdateUserProfileResource(Resource):
             db.session.rollback()
             return {"error_code": 400, "message": f"Error updating user profile: {str(e)}"}, 400
 
+@app.route('/reset')
+def reset_database():
+    """Reset the database by dropping all tables and reinserting mock data."""
+    try:
+        with app.app_context():
+            # Drop all tables
+            db.drop_all()
+            
+            # Create all tables
+            db.create_all()
+            
+            # Insert mock data
+            insert_mock_data()
+            
+        return jsonify({
+            "message": "Database reset successful",
+            "status": "success"
+        }), 200
+        
+    except Exception as e:
+        return jsonify({
+            "message": f"Error resetting database: {str(e)}",
+            "status": "error"
+        }), 500
+
 if __name__ == '__main__':
-
     with app.app_context():
-
         # Drop all tables to start fresh
         db.drop_all()
 
