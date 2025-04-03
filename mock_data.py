@@ -431,7 +431,7 @@ def insert_mock_data():
         last_name="Singh",
         date_of_birth=datetime(1986, 5, 11).date(),
         passport_issuing_country="India",
-        passport_number="IN123456789",
+        passport_number="IN123456788",
         passport_expiry=datetime(2027, 10, 25).date()
     )
 
@@ -453,7 +453,7 @@ def insert_mock_data():
         last_name="Suzuki",
         date_of_birth=datetime(1988, 2, 14).date(),
         passport_issuing_country="Japan",
-        passport_number="JP123456789",
+        passport_number="JP123456788",
         passport_expiry=datetime(2026, 6, 30).date()
     )
 
@@ -585,7 +585,7 @@ def insert_mock_data():
         last_name="Kowalczyk",
         date_of_birth=datetime(1989, 2, 25).date(),
         passport_issuing_country="Poland",
-        passport_number="PL123456789",
+        passport_number="PL123456788",
         passport_expiry=datetime(2026, 7, 19).date()
     )
 
@@ -596,7 +596,7 @@ def insert_mock_data():
         last_name="Jensen",
         date_of_birth=datetime(1991, 7, 8).date(),
         passport_issuing_country="Norway",
-        passport_number="NO987654321",
+        passport_number="NO987654322",
         passport_expiry=datetime(2028, 1, 24).date()
     )
 
