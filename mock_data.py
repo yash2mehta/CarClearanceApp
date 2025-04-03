@@ -508,7 +508,7 @@ def insert_mock_data():
         last_name="Park",
         date_of_birth=datetime(1991, 1, 27).date(),
         passport_issuing_country="South Korea",
-        passport_number="KR987654322",
+        passport_number="KR987654324",
         passport_expiry=datetime(2028, 8, 15).date()
     )
 
@@ -563,7 +563,7 @@ def insert_mock_data():
         last_name="Park",
         date_of_birth=datetime(1993, 4, 12).date(),
         passport_issuing_country="South Korea",
-        passport_number="KR987654322",
+        passport_number="KR987654323",
         passport_expiry=datetime(2028, 8, 15).date()
     )
 
