@@ -462,6 +462,11 @@ update_preset_travellers_passport_model = api.model('UpdatePresetTravellersPassp
         description="The ID of the preset to update",
         example=2
     ),
+    'preset_name': fields.String(
+        required=True,
+        description="The new name for the preset",
+        example="Family Vacation"
+    ),
     'passport_numbers': fields.List(
         fields.String,
         required=True,
@@ -1463,11 +1468,15 @@ class UpdatePresetTravellersPassportResource(Resource):
         # Get JSON data
         data = request.get_json()
         preset_id = data.get("preset_id")
+        preset_name = data.get("preset_name")
         passport_numbers = data.get("passport_numbers", [])
 
         # Validate required fields
         if not preset_id:
             return {"error_code": 400, "message": "Preset ID is required"}, 400
+        
+        if not preset_name:
+            return {"error_code": 400, "message": "Preset name is required"}, 400
         
         if not isinstance(passport_numbers, list):
             return {"error_code": 400, "message": "passport_numbers must be a list"}, 400
@@ -1496,6 +1505,9 @@ class UpdatePresetTravellersPassportResource(Resource):
             travellers.append(traveller)
 
         try:
+            # Update preset name
+            preset.preset_name = preset_name
+
             # Remove all existing traveller associations for this preset
             PresetTraveller.query.filter_by(preset_id=preset_id).delete()
             
@@ -1521,7 +1533,7 @@ class UpdatePresetTravellersPassportResource(Resource):
             # Prepare response
             response = {
                 "preset_id": preset_id,
-                "preset_name": preset.preset_name,
+                "preset_name": preset_name,
                 "created_by_user_id": user_id,
                 "travellers_added": travellers_added
             }
