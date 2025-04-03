@@ -382,13 +382,13 @@ def insert_mock_data():
 
     user_sensitive35 = UserSensitiveInformation(
         user_id=35,
-        first_name="Ahmed",
-        middle_name="Hassan",
-        last_name="Ibrahim",
-        date_of_birth=datetime(1987, 11, 22).date(),
-        passport_issuing_country="Egypt",
-        passport_number="EG123456789",
-        passport_expiry=datetime(2027, 7, 12).date()
+        first_name="Marek",
+        middle_name="Jan",
+        last_name="Nowak",
+        date_of_birth=datetime(1987, 6, 30).date(),
+        passport_issuing_country="Poland",
+        passport_number="PL987654322",
+        passport_expiry=datetime(2027, 9, 20).date()
     )
 
     user_sensitive36 = UserSensitiveInformation(
@@ -508,8 +508,8 @@ def insert_mock_data():
         last_name="Park",
         date_of_birth=datetime(1991, 1, 27).date(),
         passport_issuing_country="South Korea",
-        passport_number="KR987654321",
-        passport_expiry=datetime(2028, 7, 14).date()
+        passport_number="KR987654322",
+        passport_expiry=datetime(2028, 8, 15).date()
     )
 
     user_sensitive47 = UserSensitiveInformation(
@@ -558,13 +558,13 @@ def insert_mock_data():
 
     user_sensitive51 = UserSensitiveInformation(
         user_id=51,
-        first_name="Sara",
-        middle_name="Isabel",
-        last_name="Martínez",
-        date_of_birth=datetime(1987, 12, 28).date(),
-        passport_issuing_country="Chile",
-        passport_number="CL123456789",
-        passport_expiry=datetime(2027, 5, 10).date()
+        first_name="Ji-hoon",
+        middle_name="Min",
+        last_name="Park",
+        date_of_birth=datetime(1993, 4, 12).date(),
+        passport_issuing_country="South Korea",
+        passport_number="KR987654322",
+        passport_expiry=datetime(2028, 8, 15).date()
     )
 
     user_sensitive52 = UserSensitiveInformation(
@@ -607,7 +607,7 @@ def insert_mock_data():
         last_name="Santos",
         date_of_birth=datetime(1986, 11, 15).date(),
         passport_issuing_country="Brazil",
-        passport_number="BR123456789",
+        passport_number="BR123456788",
         passport_expiry=datetime(2027, 3, 7).date()
     )
 
