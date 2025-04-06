@@ -2613,6 +2613,185 @@ def reset_database():
             "status": "error"
         }), 500
 
+# Add a new model for the pass details
+pass_details_by_id_model = api.model('PassDetailsById', {
+    'pass_id': fields.Integer(readonly=True, description="ID of the pass"),
+    'pass_date': fields.String(required=True, description="Date and time of the pass"),
+    'expiry_datetime': fields.String(required=True, description="Expiry date and time of the pass"),
+    'pass_utilized': fields.Boolean(required=True, description="Whether the pass has been utilized"),
+    'passenger_count': fields.Integer(required=True, description="Number of passengers in the pass"),
+    'travellers': fields.List(fields.Nested(traveller_model_with_user_id), description="List of travellers in the pass")
+})
+
+@ns_pass.route('/<int:pass_id>/details')
+class PassDetailsResource(Resource):
+    """Get details for a specific pass ID."""
+
+    @api.response(200, 'Success', pass_details_by_id_model)
+    @api.response(404, 'Pass not found', error_response_model_404)
+    def get(self, pass_id):
+        """Retrieve details of a specific pass including pass date, expiry datetime, travellers, and passenger count."""
+        
+        # Check if the pass exists
+        pass_entry = Pass.query.get(pass_id)
+        if not pass_entry:
+            return {"error_code": 404, "message": "Pass not found"}, 404
+
+        # Fetch all travellers for the pass
+        travellers = (
+            db.session.query(
+                UserSensitiveInformation.user_id,
+                UserSensitiveInformation.first_name,
+                UserSensitiveInformation.middle_name,
+                UserSensitiveInformation.last_name,
+                UserSensitiveInformation.passport_number
+            )
+            .join(PassTraveller, UserSensitiveInformation.user_id == PassTraveller.user_id)
+            .filter(PassTraveller.pass_id == pass_id)
+            .all()
+        )
+
+        # Convert traveller data to list of dicts
+        travellers_list = [
+            {
+                "user_id": t.user_id,
+                "first_name": t.first_name,
+                "middle_name": t.middle_name,
+                "last_name": t.last_name,
+                "passport_number": t.passport_number
+            }
+            for t in travellers
+        ]
+        
+        # Get passenger count
+        passenger_count = len(travellers_list)
+        
+        # Prepare response
+        response = {
+            "pass_id": pass_id,
+            "pass_date": pass_entry.pass_date.strftime("%Y-%m-%d %H:%M:%S"),
+            "expiry_datetime": pass_entry.expiry_datetime.strftime("%Y-%m-%d %H:%M:%S"),
+            "pass_utilized": pass_entry.pass_utilized,
+            "passenger_count": passenger_count,
+            "travellers": travellers_list
+        }
+
+        return api.marshal(response, pass_details_by_id_model), 200
+
+# Add a new model for updating pass by ID with pass date and travellers
+update_pass_model = api.model('UpdatePass', {
+    'pass_id': fields.Integer(
+        required=True,
+        description="The ID of the pass to update",
+        example=1
+    ),
+    'pass_date': fields.String(
+        required=True,
+        description="New date and time for the pass (format: YYYY-MM-DD HH:MM:SS)",
+        example="2023-07-20 10:00:00"
+    ),
+    'traveller_passport_numbers': fields.List(
+        fields.String,
+        required=True,
+        description="List of passport numbers of travellers to be associated with the pass",
+        example=["A12345678", "C98765432", "UK7654321"]
+    )
+})
+
+@ns_pass.route('/update')
+class UpdatePassResource(Resource):
+    """Update a pass with a new date and list of travellers."""
+
+    @api.expect(update_pass_model)
+    @api.response(200, 'Pass updated successfully', pass_details_by_id_model)
+    @api.response(400, 'Required fields missing or invalid date format', error_response_model_400)
+    @api.response(404, 'Pass or traveller not found', error_response_model_404)
+    def put(self):
+        """Update a pass with a new date and list of travellers by passport numbers."""
+        
+        # Get JSON data
+        data = request.get_json()
+        pass_id = data.get("pass_id")
+        pass_date_str = data.get("pass_date")
+        traveller_passport_numbers = data.get("traveller_passport_numbers", [])
+
+        # Validate required fields
+        if not pass_id:
+            return {"error_code": 400, "message": "Pass ID is required"}, 400
+        
+        if not pass_date_str:
+            return {"error_code": 400, "message": "Pass date is required"}, 400
+        
+        if not isinstance(traveller_passport_numbers, list):
+            return {"error_code": 400, "message": "traveller_passport_numbers must be a list"}, 400
+
+        # Check if the pass exists
+        pass_entry = Pass.query.get(pass_id)
+        if not pass_entry:
+            return {"error_code": 404, "message": "Pass not found"}, 404
+
+        # Convert pass date string to datetime
+        try:
+            new_pass_date = datetime.strptime(pass_date_str, "%Y-%m-%d %H:%M:%S")
+            new_expiry_datetime = new_pass_date + timedelta(hours=24)  # Add 24 hours to the pass_date
+        except ValueError:
+            return {"error_code": 400, "message": "Invalid date format. Use YYYY-MM-DD HH:MM:SS"}, 400
+
+        # Find all travellers by passport numbers and verify they exist
+        travellers = []
+        for passport_number in traveller_passport_numbers:
+            traveller = UserSensitiveInformation.query.filter_by(passport_number=passport_number).first()
+            if not traveller:
+                return {
+                    "error_code": 404, 
+                    "message": f"Traveller with passport number {passport_number} not found"
+                }, 404
+            travellers.append(traveller)
+
+        try:
+            # Update pass date and expiry
+            pass_entry.pass_date = new_pass_date
+            pass_entry.expiry_datetime = new_expiry_datetime
+
+            # Remove all existing traveller associations for this pass
+            PassTraveller.query.filter_by(pass_id=pass_id).delete()
+            
+            # Create new associations for all travellers in the list
+            travellers_list = []
+            for traveller in travellers:
+                # Add to PassTraveller table
+                pass_traveller = PassTraveller(pass_id=pass_id, user_id=traveller.user_id)
+                db.session.add(pass_traveller)
+                
+                # Add to response list
+                travellers_list.append({
+                    "user_id": traveller.user_id,
+                    "first_name": traveller.first_name,
+                    "middle_name": traveller.middle_name,
+                    "last_name": traveller.last_name,
+                    "passport_number": traveller.passport_number
+                })
+            
+            # Commit all changes
+            db.session.commit()
+
+            # Prepare response
+            passenger_count = len(travellers_list)
+            response = {
+                "pass_id": pass_id,
+                "pass_date": pass_entry.pass_date.strftime("%Y-%m-%d %H:%M:%S"),
+                "expiry_datetime": pass_entry.expiry_datetime.strftime("%Y-%m-%d %H:%M:%S"),
+                "pass_utilized": pass_entry.pass_utilized,
+                "passenger_count": passenger_count,
+                "travellers": travellers_list
+            }
+
+            return api.marshal(response, pass_details_by_id_model), 200
+
+        except Exception as e:
+            db.session.rollback()
+            return {"error_code": 400, "message": f"Error updating pass: {str(e)}"}, 400
+
 if __name__ == '__main__':
     with app.app_context():
         # Drop all tables to start fresh
