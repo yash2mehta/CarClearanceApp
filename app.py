@@ -2900,6 +2900,112 @@ class UserPassDetailsResource(Resource):
 
         return api.marshal(response, pass_details_by_user_model), 200
 
+# Add model for batch adding travellers
+batch_add_travellers_model = api.model('BatchAddTravellers', {
+    'user_id': fields.Integer(
+        required=True,
+        description="The ID of the user to add travellers to",
+        example=1
+    ),
+    'passport_numbers': fields.List(
+        fields.String,
+        required=True,
+        description="List of passport numbers to check and add as travellers",
+        example=["A12345678", "C98765432", "UK7654321"]
+    )
+})
+
+batch_add_travellers_response_model = api.model('BatchAddTravellersResponse', {
+    'user_id': fields.Integer(required=True, description="The ID of the user the travellers were added to"),
+    'travellers_added': fields.List(fields.Nested(traveller_model_with_user_id), description="List of travellers that were added"),
+    'travellers_already_present': fields.List(fields.Nested(traveller_model_with_user_id), description="List of travellers that were already in the user's list")
+})
+
+@ns_traveller.route('/batch-add-travellers')
+class BatchAddTravellersResource(Resource):
+    """Check if travellers exist in a user's list and add them if not."""
+
+    @api.expect(batch_add_travellers_model)
+    @api.response(200, 'Travellers processed successfully', batch_add_travellers_response_model)
+    @api.response(400, 'Required fields missing', error_response_model_400)
+    @api.response(404, 'User or traveller not found', error_response_model_404)
+    def post(self):
+        """Check if travellers with given passport numbers are in a user's list and add them if not."""
+        
+        # Get JSON data
+        data = request.get_json()
+        user_id = data.get("user_id")
+        passport_numbers = data.get("passport_numbers", [])
+
+        # Validate required fields
+        if not user_id:
+            return {"error_code": 400, "message": "User ID is required"}, 400
+        
+        if not isinstance(passport_numbers, list) or not passport_numbers:
+            return {"error_code": 400, "message": "Passport numbers list is required and cannot be empty"}, 400
+
+        # Check if the user exists
+        creator = UserSensitiveInformation.query.get(user_id)
+        if not creator:
+            return {"error_code": 404, "message": "User not found"}, 404
+
+        # Get existing travellers for the user
+        existing_traveller_ids = db.session.query(UserTraveller.traveller_id)\
+            .filter(UserTraveller.creator_user_id == user_id)\
+            .all()
+        existing_traveller_ids = [t[0] for t in existing_traveller_ids]  # Convert to simple list
+        
+        travellers_added = []
+        travellers_already_present = []
+        
+        try:
+            # Process each passport number
+            for passport_number in passport_numbers:
+                # Find the traveller by passport number
+                traveller = UserSensitiveInformation.query.filter_by(passport_number=passport_number).first()
+                
+                if not traveller:
+                    return {"error_code": 404, "message": f"Traveller with passport number {passport_number} not found"}, 404
+                
+                # Check if traveller is already in the user's list
+                if traveller.user_id in existing_traveller_ids:
+                    # Traveller already exists in the user's list
+                    travellers_already_present.append({
+                        "user_id": traveller.user_id,
+                        "first_name": traveller.first_name,
+                        "middle_name": traveller.middle_name,
+                        "last_name": traveller.last_name,
+                        "passport_number": traveller.passport_number
+                    })
+                else:
+                    # Add traveller to the user's list
+                    new_traveller = UserTraveller(creator_user_id=user_id, traveller_id=traveller.user_id)
+                    db.session.add(new_traveller)
+                    
+                    travellers_added.append({
+                        "user_id": traveller.user_id,
+                        "first_name": traveller.first_name,
+                        "middle_name": traveller.middle_name,
+                        "last_name": traveller.last_name,
+                        "passport_number": traveller.passport_number
+                    })
+            
+            # Commit changes to database
+            db.session.commit()
+            
+            # Prepare response
+            response = {
+                "user_id": user_id,
+                "travellers_added": travellers_added,
+                "travellers_already_present": travellers_already_present
+            }
+            
+            return api.marshal(response, batch_add_travellers_response_model), 200
+            
+        except Exception as e:
+            db.session.rollback()
+            return {"error_code": 400, "message": f"Error processing travellers: {str(e)}"}, 400
+
 if __name__ == '__main__':
     with app.app_context():
         # Drop all tables to start fresh
