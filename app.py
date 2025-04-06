@@ -2623,14 +2623,29 @@ pass_details_by_id_model = api.model('PassDetailsById', {
     'travellers': fields.List(fields.Nested(traveller_model_with_user_id), description="List of travellers in the pass")
 })
 
-@ns_pass.route('/<int:user_id>/details')
-class PassDetailsResource(Resource):
+# Add model for the request body
+pass_details_request_model = api.model('PassDetailsRequest', {
+    'pass_id': fields.Integer(required=True, description="ID of the pass to retrieve details for", example=1)
+})
+
+@ns_pass.route('/details')
+class PassDetailsByIdResource(Resource):
     """Get details for a specific pass ID."""
 
+    @api.expect(pass_details_request_model)
     @api.response(200, 'Success', pass_details_by_id_model)
+    @api.response(400, 'Missing pass ID', error_response_model_400)
     @api.response(404, 'Pass not found', error_response_model_404)
-    def get(self, pass_id):
+    def post(self):
         """Retrieve details of a specific pass including pass date, expiry datetime, travellers, and passenger count."""
+        
+        # Get data from request body
+        data = request.get_json()
+        pass_id = data.get("pass_id")
+        
+        # Validate required fields
+        if not pass_id:
+            return {"error_code": 400, "message": "Pass ID is required"}, 400
         
         # Check if the pass exists
         pass_entry = Pass.query.get(pass_id)
@@ -2806,7 +2821,7 @@ pass_details_by_user_model = api.model('PassDetailsByUser', {
 })
 
 @ns_pass.route('/<int:user_id>/details')
-class PassDetailsResource(Resource):
+class UserPassDetailsResource(Resource):
     """Get details for all passes created by a user."""
 
     @api.response(200, 'Success', pass_details_by_user_model)
