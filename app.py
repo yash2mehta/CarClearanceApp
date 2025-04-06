@@ -3006,6 +3006,105 @@ class BatchAddTravellersResource(Resource):
             db.session.rollback()
             return {"error_code": 400, "message": f"Error processing travellers: {str(e)}"}, 400
 
+# Add model for updating a vehicle
+update_vehicle_model = api.model('UpdateVehicle', {
+    'vehicle_id': fields.Integer(
+        required=True,
+        description="ID of the vehicle to update",
+        example=1
+    ),
+    'user_vehicle_name': fields.String(
+        required=True,
+        description="New name/model for the vehicle",
+        example="Toyota Corolla"
+    ),
+    'vehicle_number': fields.String(
+        required=True,
+        description="New license plate number for the vehicle",
+        example="ABC123"
+    )
+})
+
+update_vehicle_response_model = api.model('UpdateVehicleResponse', {
+    'vehicle_id': fields.Integer(readonly=True, description="ID of the updated vehicle"),
+    'user_vehicle_name': fields.String(required=True, description="Updated name/model of the vehicle"),
+    'vehicle_number': fields.String(required=True, description="Updated license plate number"),
+    'message': fields.String(required=True, description="Status message")
+})
+
+@ns_vehicle.route('/<int:user_id>/update-vehicle')
+class UpdateVehicleResource(Resource):
+    """Update vehicle information for a specific user."""
+
+    @api.expect(update_vehicle_model)
+    @api.response(200, 'Vehicle updated successfully', update_vehicle_response_model)
+    @api.response(400, 'Required fields missing', error_response_model_400)
+    @api.response(404, 'User, vehicle or association not found', error_response_model_404)
+    def put(self, user_id):
+        """Update vehicle information including user_vehicle_name and vehicle_number for a specific user."""
+        
+        # Check if the user exists
+        user = UserSensitiveInformation.query.get(user_id)
+        if not user:
+            return {"error_code": 404, "message": "User not found"}, 404
+        
+        # Get JSON data from request
+        data = request.get_json()
+        vehicle_id = data.get('vehicle_id')
+        user_vehicle_name = data.get('user_vehicle_name')
+        vehicle_number = data.get('vehicle_number')
+        
+        # Validate required fields
+        if not vehicle_id:
+            return {"error_code": 400, "message": "Vehicle ID is required"}, 400
+        
+        if not user_vehicle_name:
+            return {"error_code": 400, "message": "User vehicle name is required"}, 400
+            
+        if not vehicle_number:
+            return {"error_code": 400, "message": "Vehicle number is required"}, 400
+        
+        # Check if the vehicle exists
+        vehicle = Vehicle.query.get(vehicle_id)
+        if not vehicle:
+            return {"error_code": 404, "message": "Vehicle not found"}, 404
+        
+        # Check if the user has this vehicle
+        user_vehicle = UserVehicle.query.filter_by(
+            user_id=user_id,
+            vehicle_id=vehicle_id
+        ).first()
+        
+        if not user_vehicle:
+            return {
+                "error_code": 404, 
+                "message": "This vehicle is not in your vehicle list"
+            }, 404
+        
+        try:
+            # Update vehicle details
+            vehicle.vehicle_number = vehicle_number
+            
+            # Update only this user's vehicle name
+            user_vehicle.user_vehicle_model = user_vehicle_name
+            
+            # Commit changes
+            db.session.commit()
+            
+            # Prepare response
+            response = {
+                "vehicle_id": vehicle_id,
+                "user_vehicle_name": user_vehicle_name,
+                "vehicle_number": vehicle_number,
+                "message": "Vehicle updated successfully"
+            }
+            
+            return api.marshal(response, update_vehicle_response_model), 200
+            
+        except Exception as e:
+            db.session.rollback()
+            return {"error_code": 400, "message": f"Error updating vehicle: {str(e)}"}, 400
+
 if __name__ == '__main__':
     with app.app_context():
         # Drop all tables to start fresh
