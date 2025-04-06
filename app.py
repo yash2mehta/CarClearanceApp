@@ -2623,7 +2623,7 @@ pass_details_by_id_model = api.model('PassDetailsById', {
     'travellers': fields.List(fields.Nested(traveller_model_with_user_id), description="List of travellers in the pass")
 })
 
-@ns_pass.route('/<int:pass_id>/details')
+@ns_pass.route('/<int:user_id>/details')
 class PassDetailsResource(Resource):
     """Get details for a specific pass ID."""
 
@@ -2791,6 +2791,99 @@ class UpdatePassResource(Resource):
         except Exception as e:
             db.session.rollback()
             return {"error_code": 400, "message": f"Error updating pass: {str(e)}"}, 400
+
+# Update the model to support user based querying with a query parameter for pass_id
+pass_details_by_user_model = api.model('PassDetailsByUser', {
+    'user_id': fields.Integer(readonly=True, description="ID of the user"),
+    'passes': fields.List(fields.Nested(api.model('PassDetails', {
+        'pass_id': fields.Integer(readonly=True, description="ID of the pass"),
+        'pass_date': fields.String(required=True, description="Date and time of the pass"),
+        'expiry_datetime': fields.String(required=True, description="Expiry date and time of the pass"),
+        'pass_utilized': fields.Boolean(required=True, description="Whether the pass has been utilized"),
+        'passenger_count': fields.Integer(required=True, description="Number of passengers in the pass"),
+        'travellers': fields.List(fields.Nested(traveller_model_with_user_id), description="List of travellers in the pass")
+    })))
+})
+
+@ns_pass.route('/<int:user_id>/details')
+class PassDetailsResource(Resource):
+    """Get details for all passes created by a user."""
+
+    @api.response(200, 'Success', pass_details_by_user_model)
+    @api.response(404, 'User not found', error_response_model_404)
+    def get(self, user_id):
+        """Retrieve details of all passes created by a user, including pass date, expiry datetime, travellers, and passenger count."""
+        
+        # Check if the user exists
+        user = UserSensitiveInformation.query.get(user_id)
+        if not user:
+            return {"error_code": 404, "message": "User not found"}, 404
+
+        # Get optional pass_id from query parameters
+        pass_id = request.args.get('pass_id', None)
+        
+        # Fetch passes created by the user
+        passes_query = Pass.query.filter(Pass.creator_user_id == user_id)
+        
+        # If pass_id is provided, filter by pass_id as well
+        if pass_id is not None:
+            try:
+                pass_id = int(pass_id)
+                passes_query = passes_query.filter(Pass.pass_id == pass_id)
+            except ValueError:
+                return {"error_code": 400, "message": "Invalid pass_id parameter"}, 400
+        
+        passes = passes_query.all()
+        
+        # Prepare pass details
+        passes_list = []
+        for pass_entry in passes:
+            # Fetch all travellers for the pass
+            travellers = (
+                db.session.query(
+                    UserSensitiveInformation.user_id,
+                    UserSensitiveInformation.first_name,
+                    UserSensitiveInformation.middle_name,
+                    UserSensitiveInformation.last_name,
+                    UserSensitiveInformation.passport_number
+                )
+                .join(PassTraveller, UserSensitiveInformation.user_id == PassTraveller.user_id)
+                .filter(PassTraveller.pass_id == pass_entry.pass_id)
+                .all()
+            )
+
+            # Convert traveller data to list of dicts
+            travellers_list = [
+                {
+                    "user_id": t.user_id,
+                    "first_name": t.first_name,
+                    "middle_name": t.middle_name,
+                    "last_name": t.last_name,
+                    "passport_number": t.passport_number
+                }
+                for t in travellers
+            ]
+            
+            # Get passenger count
+            passenger_count = len(travellers_list)
+            
+            # Add pass details to list
+            passes_list.append({
+                "pass_id": pass_entry.pass_id,
+                "pass_date": pass_entry.pass_date.strftime("%Y-%m-%d %H:%M:%S"),
+                "expiry_datetime": pass_entry.expiry_datetime.strftime("%Y-%m-%d %H:%M:%S"),
+                "pass_utilized": pass_entry.pass_utilized,
+                "passenger_count": passenger_count,
+                "travellers": travellers_list
+            })
+
+        # Prepare response
+        response = {
+            "user_id": user_id,
+            "passes": passes_list
+        }
+
+        return api.marshal(response, pass_details_by_user_model), 200
 
 if __name__ == '__main__':
     with app.app_context():
