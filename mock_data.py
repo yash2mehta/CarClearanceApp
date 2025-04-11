@@ -1,10 +1,10 @@
 from datetime import datetime
-from db_instance import db # Import the database instance
+from db_instance import db
 from models import UserSensitiveInformation, Vehicle, UserVehicle, Pass, PassTraveller, Preset, PresetTraveller, UserTraveller
 import hashlib
 
 def insert_mock_data():
-    # Insert mock data into the database
+
     user_sensitive1 = UserSensitiveInformation(
         user_id=1,
         first_name="Alice",
@@ -60,7 +60,7 @@ def insert_mock_data():
         passport_expiry=datetime(2030, 9, 15).date()
     )
 
-    # Adding 50 new users with diverse information
+
     user_sensitive6 = UserSensitiveInformation(
         user_id=6,
         first_name="Élise",
@@ -611,24 +611,24 @@ def insert_mock_data():
         passport_expiry=datetime(2027, 3, 7).date()
     )
 
-    vehicle1 = Vehicle(vehicle_number='SKR9859E')  # Toyota Corolla
-    vehicle2 = Vehicle(vehicle_number='SGB267D')   # Honda Civic
-    vehicle3 = Vehicle(vehicle_number='GBH1206B')  # Tesla Model 3
-    vehicle4 = Vehicle(vehicle_number='GBL1368X')  # BMW X5
-    vehicle5 = Vehicle(vehicle_number='MKL8721Z')  # Mercedes-Benz C-Class (New vehicle)
-    vehicle6 = Vehicle(vehicle_number='RXA4123M')  # Audi A4 (New vehicle)
+    vehicle1 = Vehicle(vehicle_number='SKR9859E')
+    vehicle2 = Vehicle(vehicle_number='SGB267D')
+    vehicle3 = Vehicle(vehicle_number='GBH1206B')
+    vehicle4 = Vehicle(vehicle_number='GBL1368X')
+    vehicle5 = Vehicle(vehicle_number='MKL8721Z')
+    vehicle6 = Vehicle(vehicle_number='RXA4123M')
     
-    # New vehicles for user 2
-    vehicle7 = Vehicle(vehicle_number='SJX1234A')  # Lexus RX
-    vehicle8 = Vehicle(vehicle_number='SJY5678B')  # Volvo XC90
-    vehicle9 = Vehicle(vehicle_number='SJZ9012C')  # Porsche Cayenne
-    vehicle10 = Vehicle(vehicle_number='SKA3456D')  # Range Rover Sport
-    vehicle11 = Vehicle(vehicle_number='SKB7890E')  # Jaguar F-PACE
-    vehicle12 = Vehicle(vehicle_number='SKC1234F')  # Land Rover Discovery
-    vehicle13 = Vehicle(vehicle_number='SKD5678G')  # Maserati Levante
-    vehicle14 = Vehicle(vehicle_number='SKE9012H')  # Bentley Bentayga
-    vehicle15 = Vehicle(vehicle_number='SKF3456I')  # Rolls-Royce Cullinan
-    vehicle16 = Vehicle(vehicle_number='SKG7890J')  # Lamborghini Urus
+
+    vehicle7 = Vehicle(vehicle_number='SJX1234A')
+    vehicle8 = Vehicle(vehicle_number='SJY5678B')
+    vehicle9 = Vehicle(vehicle_number='SJZ9012C')
+    vehicle10 = Vehicle(vehicle_number='SKA3456D')
+    vehicle11 = Vehicle(vehicle_number='SKB7890E')
+    vehicle12 = Vehicle(vehicle_number='SKC1234F')
+    vehicle13 = Vehicle(vehicle_number='SKD5678G')
+    vehicle14 = Vehicle(vehicle_number='SKE9012H')
+    vehicle15 = Vehicle(vehicle_number='SKF3456I')
+    vehicle16 = Vehicle(vehicle_number='SKG7890J')
 
     user_vehicle1 = UserVehicle(user_id=1, vehicle_id=1, user_vehicle_model="Toyota Corolla")
     user_vehicle2 = UserVehicle(user_id=2, vehicle_id=1, user_vehicle_model="Honda Civic")
@@ -636,11 +636,11 @@ def insert_mock_data():
     user_vehicle4 = UserVehicle(user_id=3, vehicle_id=2, user_vehicle_model="Mazda CX-5")
     user_vehicle5 = UserVehicle(user_id=4, vehicle_id=3, user_vehicle_model="Tesla Model 3")
     user_vehicle6 = UserVehicle(user_id=4, vehicle_id=4, user_vehicle_model="BMW X5")
-    # New vehicles for user 1
+
     user_vehicle7 = UserVehicle(user_id=1, vehicle_id=5, user_vehicle_model="Mercedes-Benz C-Class")
     user_vehicle8 = UserVehicle(user_id=1, vehicle_id=6, user_vehicle_model="Audi A4")
     
-    # New user vehicles for user 2
+
     user_vehicle9 = UserVehicle(user_id=2, vehicle_id=7, user_vehicle_model="Lexus RX")
     user_vehicle10 = UserVehicle(user_id=2, vehicle_id=8, user_vehicle_model="Volvo XC90")
     user_vehicle11 = UserVehicle(user_id=2, vehicle_id=9, user_vehicle_model="Porsche Cayenne")
@@ -658,27 +658,27 @@ def insert_mock_data():
     pass4 = Pass(creator_user_id=4, pass_date=datetime(2025, 2, 19, 0, 0), expiry_datetime=datetime(2025, 2, 20, 0, 0), pass_utilized=False)
     pass5 = Pass(creator_user_id=1, pass_date=datetime(2025, 2, 25, 0, 0), expiry_datetime=datetime(2025, 2, 26, 0, 0), pass_utilized=False)
 
-    # New passes for user 1
-    pass6 = Pass(creator_user_id=1, pass_date=datetime(2025, 3, 7, 14, 30), expiry_datetime=datetime(2025, 3, 8, 14, 30), pass_utilized=True)  # Same date as pass1 but pass_utilized=False
-    pass7 = Pass(creator_user_id=1, pass_date=datetime(2025, 4, 15, 0, 0), expiry_datetime=datetime(2025, 4, 16, 0, 0), pass_utilized=True)  # Different date pass
+
+    pass6 = Pass(creator_user_id=1, pass_date=datetime(2025, 3, 7, 14, 30), expiry_datetime=datetime(2025, 3, 8, 14, 30), pass_utilized=True)
+    pass7 = Pass(creator_user_id=1, pass_date=datetime(2025, 4, 15, 0, 0), expiry_datetime=datetime(2025, 4, 16, 0, 0), pass_utilized=True)
     
-    # New passes for user 2
+
     pass8 = Pass(creator_user_id=2, pass_date=datetime(2025, 4, 1, 9, 0), expiry_datetime=datetime(2025, 4, 2, 9, 0), pass_utilized=True)
     pass9 = Pass(creator_user_id=2, pass_date=datetime(2025, 4, 15, 14, 30), expiry_datetime=datetime(2025, 4, 16, 14, 30), pass_utilized=False)
     pass10 = Pass(creator_user_id=2, pass_date=datetime(2025, 5, 1, 10, 0), expiry_datetime=datetime(2025, 5, 2, 10, 0), pass_utilized=False)
     pass11 = Pass(creator_user_id=2, pass_date=datetime(2025, 5, 15, 16, 0), expiry_datetime=datetime(2025, 5, 16, 16, 0), pass_utilized=False)
     pass12 = Pass(creator_user_id=2, pass_date=datetime(2025, 6, 1, 11, 0), expiry_datetime=datetime(2025, 6, 2, 11, 0), pass_utilized=False)
 
-    pass_traveller1 = PassTraveller(pass_id=1, user_id=1)  # Alice as traveller for SKR9859E
-    pass_traveller2 = PassTraveller(pass_id=1, user_id=2)  # Bob as traveller for SKR9859E
-    pass_traveller3 = PassTraveller(pass_id=2, user_id=2)  # Bob as traveller for SGB267D
-    pass_traveller4 = PassTraveller(pass_id=2, user_id=3)  # Charlie as traveller for SGB267D
-    pass_traveller5 = PassTraveller(pass_id=6, user_id=1)  # Alice as traveller for pass6
-    pass_traveller6 = PassTraveller(pass_id=6, user_id=2)  # Bob as co-traveller for pass6
-    pass_traveller7 = PassTraveller(pass_id=6, user_id=3)  # Charlie as co-traveller for pass6
-    pass_traveller8 = PassTraveller(pass_id=6, user_id=4)  # Dave as co-traveller for pass6
-    pass_traveller9 = PassTraveller(pass_id=7, user_id=1)  # Alice as traveller for pass7
-    pass_traveller10 = PassTraveller(pass_id=7, user_id=2)  # Bob as co-traveller for pass7
+    pass_traveller1 = PassTraveller(pass_id=1, user_id=1)
+    pass_traveller2 = PassTraveller(pass_id=1, user_id=2)
+    pass_traveller3 = PassTraveller(pass_id=2, user_id=2)
+    pass_traveller4 = PassTraveller(pass_id=2, user_id=3)
+    pass_traveller5 = PassTraveller(pass_id=6, user_id=1)
+    pass_traveller6 = PassTraveller(pass_id=6, user_id=2)
+    pass_traveller7 = PassTraveller(pass_id=6, user_id=3)
+    pass_traveller8 = PassTraveller(pass_id=6, user_id=4)
+    pass_traveller9 = PassTraveller(pass_id=7, user_id=1)
+    pass_traveller10 = PassTraveller(pass_id=7, user_id=2)
     pass_traveller11 = PassTraveller(pass_id=3, user_id=4)
     pass_traveller12 = PassTraveller(pass_id=3, user_id=5)
     pass_traveller13 = PassTraveller(pass_id=4, user_id=4)
@@ -687,61 +687,61 @@ def insert_mock_data():
     pass_traveller16 = PassTraveller(pass_id=5, user_id=2)
     pass_traveller17 = PassTraveller(pass_id=5, user_id=3)
     
-    # New pass travellers for user 2's passes
-    pass_traveller18 = PassTraveller(pass_id=8, user_id=2)  # Bob as traveller for pass8
-    pass_traveller19 = PassTraveller(pass_id=8, user_id=3)  # Charlie as co-traveller for pass8
-    pass_traveller20 = PassTraveller(pass_id=9, user_id=2)  # Bob as traveller for pass9
-    pass_traveller21 = PassTraveller(pass_id=9, user_id=4)  # Dave as co-traveller for pass9
-    pass_traveller22 = PassTraveller(pass_id=10, user_id=2)  # Bob as traveller for pass10
-    pass_traveller23 = PassTraveller(pass_id=10, user_id=5)  # Test as co-traveller for pass10
-    pass_traveller24 = PassTraveller(pass_id=11, user_id=2)  # Bob as traveller for pass11
-    pass_traveller25 = PassTraveller(pass_id=11, user_id=6)  # Élise as co-traveller for pass11
-    pass_traveller26 = PassTraveller(pass_id=12, user_id=2)  # Bob as traveller for pass12
-    pass_traveller27 = PassTraveller(pass_id=12, user_id=7)  # Hans as co-traveller for pass12
 
-    # Updated pass travellers for user 2's passes with 3-10 users per pass
-    # Pass 8: 5 users
-    pass_traveller18 = PassTraveller(pass_id=8, user_id=2)  # Bob as traveller for pass8
-    pass_traveller19 = PassTraveller(pass_id=8, user_id=3)  # Charlie as co-traveller for pass8
-    pass_traveller20 = PassTraveller(pass_id=8, user_id=4)  # Dave as co-traveller for pass8
-    pass_traveller21 = PassTraveller(pass_id=8, user_id=5)  # Test as co-traveller for pass8
-    pass_traveller22 = PassTraveller(pass_id=8, user_id=6)  # Élise as co-traveller for pass8
+    pass_traveller18 = PassTraveller(pass_id=8, user_id=2)
+    pass_traveller19 = PassTraveller(pass_id=8, user_id=3)
+    pass_traveller20 = PassTraveller(pass_id=9, user_id=2)
+    pass_traveller21 = PassTraveller(pass_id=9, user_id=4)
+    pass_traveller22 = PassTraveller(pass_id=10, user_id=2)
+    pass_traveller23 = PassTraveller(pass_id=10, user_id=5)
+    pass_traveller24 = PassTraveller(pass_id=11, user_id=2)
+    pass_traveller25 = PassTraveller(pass_id=11, user_id=6)
+    pass_traveller26 = PassTraveller(pass_id=12, user_id=2)
+    pass_traveller27 = PassTraveller(pass_id=12, user_id=7)
+
+
+
+    pass_traveller18 = PassTraveller(pass_id=8, user_id=2)
+    pass_traveller19 = PassTraveller(pass_id=8, user_id=3)
+    pass_traveller20 = PassTraveller(pass_id=8, user_id=4)
+    pass_traveller21 = PassTraveller(pass_id=8, user_id=5)
+    pass_traveller22 = PassTraveller(pass_id=8, user_id=6)
     
-    # Pass 9: 8 users
-    pass_traveller23 = PassTraveller(pass_id=9, user_id=2)  # Bob as traveller for pass9
-    pass_traveller24 = PassTraveller(pass_id=9, user_id=4)  # Dave as co-traveller for pass9
-    pass_traveller25 = PassTraveller(pass_id=9, user_id=7)  # Hans as co-traveller for pass9
-    pass_traveller26 = PassTraveller(pass_id=9, user_id=8)  # Sofia as co-traveller for pass9
-    pass_traveller27 = PassTraveller(pass_id=9, user_id=9)  # Liam as co-traveller for pass9
-    pass_traveller28 = PassTraveller(pass_id=9, user_id=10)  # Alessandro as co-traveller for pass9
-    pass_traveller29 = PassTraveller(pass_id=9, user_id=11)  # Yuki as co-traveller for pass9
-    pass_traveller30 = PassTraveller(pass_id=9, user_id=12)  # Wei as co-traveller for pass9
+
+    pass_traveller23 = PassTraveller(pass_id=9, user_id=2)
+    pass_traveller24 = PassTraveller(pass_id=9, user_id=4)
+    pass_traveller25 = PassTraveller(pass_id=9, user_id=7)
+    pass_traveller26 = PassTraveller(pass_id=9, user_id=8)
+    pass_traveller27 = PassTraveller(pass_id=9, user_id=9)
+    pass_traveller28 = PassTraveller(pass_id=9, user_id=10)
+    pass_traveller29 = PassTraveller(pass_id=9, user_id=11)
+    pass_traveller30 = PassTraveller(pass_id=9, user_id=12)
     
-    # Pass 10: 3 users
-    pass_traveller31 = PassTraveller(pass_id=10, user_id=2)  # Bob as traveller for pass10
-    pass_traveller32 = PassTraveller(pass_id=10, user_id=5)  # Test as co-traveller for pass10
-    pass_traveller33 = PassTraveller(pass_id=10, user_id=13)  # Priya as co-traveller for pass10
+
+    pass_traveller31 = PassTraveller(pass_id=10, user_id=2)
+    pass_traveller32 = PassTraveller(pass_id=10, user_id=5)
+    pass_traveller33 = PassTraveller(pass_id=10, user_id=13)
     
-    # Pass 11: 10 users
-    pass_traveller34 = PassTraveller(pass_id=11, user_id=2)  # Bob as traveller for pass11
-    pass_traveller35 = PassTraveller(pass_id=11, user_id=6)  # Élise as co-traveller for pass11
-    pass_traveller36 = PassTraveller(pass_id=11, user_id=14)  # Mohammed as co-traveller for pass11
-    pass_traveller37 = PassTraveller(pass_id=11, user_id=15)  # Olga as co-traveller for pass11
-    pass_traveller38 = PassTraveller(pass_id=11, user_id=16)  # Lars as co-traveller for pass11
-    pass_traveller39 = PassTraveller(pass_id=11, user_id=17)  # Astrid as co-traveller for pass11
-    pass_traveller40 = PassTraveller(pass_id=11, user_id=18)  # Johan as co-traveller for pass11
-    pass_traveller41 = PassTraveller(pass_id=11, user_id=19)  # Elena as co-traveller for pass11
-    pass_traveller42 = PassTraveller(pass_id=11, user_id=20)  # Kazimierz as co-traveller for pass11
-    pass_traveller43 = PassTraveller(pass_id=11, user_id=21)  # Sven as co-traveller for pass11
+
+    pass_traveller34 = PassTraveller(pass_id=11, user_id=2)
+    pass_traveller35 = PassTraveller(pass_id=11, user_id=6)
+    pass_traveller36 = PassTraveller(pass_id=11, user_id=14)
+    pass_traveller37 = PassTraveller(pass_id=11, user_id=15)
+    pass_traveller38 = PassTraveller(pass_id=11, user_id=16)
+    pass_traveller39 = PassTraveller(pass_id=11, user_id=17)
+    pass_traveller40 = PassTraveller(pass_id=11, user_id=18)
+    pass_traveller41 = PassTraveller(pass_id=11, user_id=19)
+    pass_traveller42 = PassTraveller(pass_id=11, user_id=20)
+    pass_traveller43 = PassTraveller(pass_id=11, user_id=21)
     
-    # Pass 12: 7 users
-    pass_traveller44 = PassTraveller(pass_id=12, user_id=2)  # Bob as traveller for pass12
-    pass_traveller45 = PassTraveller(pass_id=12, user_id=7)  # Hans as co-traveller for pass12
-    pass_traveller46 = PassTraveller(pass_id=12, user_id=22)  # Isabella as co-traveller for pass12
-    pass_traveller47 = PassTraveller(pass_id=12, user_id=23)  # Carlos as co-traveller for pass12
-    pass_traveller48 = PassTraveller(pass_id=12, user_id=24)  # Aisha as co-traveller for pass12
-    pass_traveller49 = PassTraveller(pass_id=12, user_id=25)  # Hassan as co-traveller for pass12
-    pass_traveller50 = PassTraveller(pass_id=12, user_id=26)  # Nina as co-traveller for pass12
+
+    pass_traveller44 = PassTraveller(pass_id=12, user_id=2)
+    pass_traveller45 = PassTraveller(pass_id=12, user_id=7)
+    pass_traveller46 = PassTraveller(pass_id=12, user_id=22)
+    pass_traveller47 = PassTraveller(pass_id=12, user_id=23)
+    pass_traveller48 = PassTraveller(pass_id=12, user_id=24)
+    pass_traveller49 = PassTraveller(pass_id=12, user_id=25)
+    pass_traveller50 = PassTraveller(pass_id=12, user_id=26)
 
     preset1 = Preset(preset_name="Work Trip", user_id=1)
     preset2 = Preset(preset_name="Vacation Mode", user_id=1)
@@ -749,7 +749,7 @@ def insert_mock_data():
     preset4 = Preset(preset_name="Weekend Getaway", user_id=3)
     preset5 = Preset(preset_name="Family Visit", user_id=4)
     
-    # New presets for user ID 2
+
     preset6 = Preset(preset_name="Business Meeting", user_id=2)
     preset7 = Preset(preset_name="Team Building", user_id=2)
     preset8 = Preset(preset_name="Client Visit", user_id=2)
@@ -764,40 +764,40 @@ def insert_mock_data():
     preset_traveller6 = PresetTraveller(preset_id=5, user_id=4)
     preset_traveller7 = PresetTraveller(preset_id=5, user_id=1)
 
-    # New preset travellers for user ID 2's presets
-    # Preset 6: 4 users
-    preset_traveller8 = PresetTraveller(preset_id=6, user_id=2)  # Bob as creator
-    preset_traveller9 = PresetTraveller(preset_id=6, user_id=3)  # Charlie as traveller
-    preset_traveller10 = PresetTraveller(preset_id=6, user_id=4)  # Dave as traveller
-    preset_traveller11 = PresetTraveller(preset_id=6, user_id=5)  # Test as traveller
-    
-    # Preset 7: 6 users
-    preset_traveller12 = PresetTraveller(preset_id=7, user_id=2)  # Bob as creator
-    preset_traveller13 = PresetTraveller(preset_id=7, user_id=6)  # Élise as traveller
-    preset_traveller14 = PresetTraveller(preset_id=7, user_id=7)  # Hans as traveller
-    preset_traveller15 = PresetTraveller(preset_id=7, user_id=8)  # Sofia as traveller
-    preset_traveller16 = PresetTraveller(preset_id=7, user_id=9)  # Liam as traveller
-    preset_traveller17 = PresetTraveller(preset_id=7, user_id=10)  # Alessandro as traveller
-    
-    # Preset 8: 3 users
-    preset_traveller18 = PresetTraveller(preset_id=8, user_id=2)  # Bob as creator
-    preset_traveller19 = PresetTraveller(preset_id=8, user_id=11)  # Yuki as traveller
-    preset_traveller20 = PresetTraveller(preset_id=8, user_id=12)  # Wei as traveller
-    
-    # Preset 9: 5 users
-    preset_traveller21 = PresetTraveller(preset_id=9, user_id=2)  # Bob as creator
-    preset_traveller22 = PresetTraveller(preset_id=9, user_id=13)  # Priya as traveller
-    preset_traveller23 = PresetTraveller(preset_id=9, user_id=14)  # Mohammed as traveller
-    preset_traveller24 = PresetTraveller(preset_id=9, user_id=15)  # Olga as traveller
-    preset_traveller25 = PresetTraveller(preset_id=9, user_id=16)  # Lars as traveller
-    
-    # Preset 10: 4 users
-    preset_traveller26 = PresetTraveller(preset_id=10, user_id=2)  # Bob as creator
-    preset_traveller27 = PresetTraveller(preset_id=10, user_id=17)  # Astrid as traveller
-    preset_traveller28 = PresetTraveller(preset_id=10, user_id=18)  # Johan as traveller
-    preset_traveller29 = PresetTraveller(preset_id=10, user_id=19)  # Elena as traveller
 
-    # New Table: UserTraveller (Tracks manually added travellers)
+
+    preset_traveller8 = PresetTraveller(preset_id=6, user_id=2)
+    preset_traveller9 = PresetTraveller(preset_id=6, user_id=3)
+    preset_traveller10 = PresetTraveller(preset_id=6, user_id=4)
+    preset_traveller11 = PresetTraveller(preset_id=6, user_id=5)
+    
+
+    preset_traveller12 = PresetTraveller(preset_id=7, user_id=2)
+    preset_traveller13 = PresetTraveller(preset_id=7, user_id=6)
+    preset_traveller14 = PresetTraveller(preset_id=7, user_id=7)
+    preset_traveller15 = PresetTraveller(preset_id=7, user_id=8)
+    preset_traveller16 = PresetTraveller(preset_id=7, user_id=9)
+    preset_traveller17 = PresetTraveller(preset_id=7, user_id=10)
+    
+
+    preset_traveller18 = PresetTraveller(preset_id=8, user_id=2)
+    preset_traveller19 = PresetTraveller(preset_id=8, user_id=11)
+    preset_traveller20 = PresetTraveller(preset_id=8, user_id=12)
+    
+
+    preset_traveller21 = PresetTraveller(preset_id=9, user_id=2)
+    preset_traveller22 = PresetTraveller(preset_id=9, user_id=13)
+    preset_traveller23 = PresetTraveller(preset_id=9, user_id=14)
+    preset_traveller24 = PresetTraveller(preset_id=9, user_id=15)
+    preset_traveller25 = PresetTraveller(preset_id=9, user_id=16)
+    
+
+    preset_traveller26 = PresetTraveller(preset_id=10, user_id=2)
+    preset_traveller27 = PresetTraveller(preset_id=10, user_id=17)
+    preset_traveller28 = PresetTraveller(preset_id=10, user_id=18)
+    preset_traveller29 = PresetTraveller(preset_id=10, user_id=19)
+
+
     user_traveller1 = UserTraveller(creator_user_id=1, traveller_id=2)
     user_traveller2 = UserTraveller(creator_user_id=1, traveller_id=3)
     user_traveller3 = UserTraveller(creator_user_id=3, traveller_id=1)
@@ -805,20 +805,20 @@ def insert_mock_data():
 
     user_traveller5 = UserTraveller(creator_user_id=2, traveller_id=4)
     
-    # Additional user travellers for user ID 2
-    user_traveller6 = UserTraveller(creator_user_id=2, traveller_id=5)  # Test as traveller
-    user_traveller7 = UserTraveller(creator_user_id=2, traveller_id=6)  # Élise as traveller
-    user_traveller8 = UserTraveller(creator_user_id=2, traveller_id=7)  # Hans as traveller
-    user_traveller9 = UserTraveller(creator_user_id=2, traveller_id=8)  # Sofia as traveller
-    user_traveller10 = UserTraveller(creator_user_id=2, traveller_id=9)  # Liam as traveller
-    user_traveller11 = UserTraveller(creator_user_id=2, traveller_id=10)  # Alessandro as traveller
-    user_traveller12 = UserTraveller(creator_user_id=2, traveller_id=11)  # Yuki as traveller
-    user_traveller13 = UserTraveller(creator_user_id=2, traveller_id=12)  # Wei as traveller
-    user_traveller14 = UserTraveller(creator_user_id=2, traveller_id=13)  # Priya as traveller
-    user_traveller15 = UserTraveller(creator_user_id=2, traveller_id=14)  # Mohammed as traveller
+
+    user_traveller6 = UserTraveller(creator_user_id=2, traveller_id=5)
+    user_traveller7 = UserTraveller(creator_user_id=2, traveller_id=6)
+    user_traveller8 = UserTraveller(creator_user_id=2, traveller_id=7)
+    user_traveller9 = UserTraveller(creator_user_id=2, traveller_id=8)
+    user_traveller10 = UserTraveller(creator_user_id=2, traveller_id=9)
+    user_traveller11 = UserTraveller(creator_user_id=2, traveller_id=10)
+    user_traveller12 = UserTraveller(creator_user_id=2, traveller_id=11)
+    user_traveller13 = UserTraveller(creator_user_id=2, traveller_id=12)
+    user_traveller14 = UserTraveller(creator_user_id=2, traveller_id=13)
+    user_traveller15 = UserTraveller(creator_user_id=2, traveller_id=14)
 
 
-    # Adding all records to the session
+
     db.session.add_all([
         user_sensitive1, user_sensitive2, user_sensitive3, user_sensitive4, user_sensitive5,
         user_sensitive6, user_sensitive7, user_sensitive8, user_sensitive9, user_sensitive10,
@@ -852,6 +852,6 @@ def insert_mock_data():
     ])
 
 
-    # Commit the session to save the records to the database
+
     db.session.commit()
     print("✅ Mock data inserted successfully.")
