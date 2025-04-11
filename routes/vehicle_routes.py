@@ -11,6 +11,7 @@ from api_models import (
     delete_vehicle_model,
     delete_message_model
 )
+from .api_logger import log_api_access
 
 def init_vehicle_routes(api):
     ns_vehicle = api.namespace('vehicles', description='Vehicle-related operations')
@@ -22,6 +23,7 @@ def init_vehicle_routes(api):
         @api.response(200, 'Vehicle added successfully', add_vehicle_model_result)
         @api.response(400, 'Missing vehicle number or user vehicle model', error_response_model_400)
         @api.response(404, 'User or vehicle not found', error_response_model_404)
+        @log_api_access('POST /vehicles/<user_id>/add-vehicle')
         def post(self, user_id):
             """Add a vehicle to the user"""
             user = UserSensitiveInformation.query.get(user_id)
@@ -71,6 +73,7 @@ def init_vehicle_routes(api):
         @api.response(200, 'Vehicle deleted successfully', delete_message_model)
         @api.response(400, 'Required fields missing', error_response_model_400)
         @api.response(404, 'User, vehicle or association not found', error_response_model_404)
+        @log_api_access('DELETE /vehicles/<user_id>/delete-vehicle-by-number')
         def delete(self, user_id):
             """Delete a vehicle from the user's list of vehicles by vehicle number."""
             user = UserSensitiveInformation.query.get(user_id)
@@ -107,6 +110,7 @@ def init_vehicle_routes(api):
         """Get all vehicles associated with a user."""
         @api.response(200, 'Success', all_vehicles_model) 
         @api.response(404, 'User not found', error_response_model_404)
+        @log_api_access('GET /vehicles/<user_id>/get-all-vehicles')
         def get(self, user_id):
             """Retrieve all vehicles linked to a user."""
             user = UserSensitiveInformation.query.get(user_id)

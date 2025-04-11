@@ -17,6 +17,7 @@ from api_models import (
     error_response_model_404,
     success_message_model
 )
+from .api_logger import log_api_access
 
 def init_pass_routes(api):
     ns_pass = api.namespace('passes', description='Pass-related operations')
@@ -25,6 +26,7 @@ def init_pass_routes(api):
     class UserPassesResource(Resource):
         @api.response(200, 'Success', pass_response_model)
         @api.response(404, 'User ID not found', error_response_model_404)
+        @log_api_access('GET /passes/<user_id>/passes')
         def get(self, user_id):
             user = UserSensitiveInformation.query.get(user_id)
             if not user:
@@ -89,6 +91,7 @@ def init_pass_routes(api):
         @api.response(200, 'Success', pass_details_by_id_model)
         @api.response(400, 'Missing pass ID', error_response_model_400)
         @api.response(404, 'Pass not found', error_response_model_404)
+        @log_api_access('POST /passes/details')
         def post(self):
             """Retrieve details of a specific pass including pass date, expiry datetime, travellers, and passenger count."""
             data = request.get_json()
@@ -142,6 +145,7 @@ def init_pass_routes(api):
         @api.response(200, 'Success', pass_response_model_2)
         @api.response(400, 'Missing required fields like Pass user id and pass date or invalid date format ', error_response_model_400)
         @api.response(404, 'Resource not found', error_response_model_404)
+        @log_api_access('POST /passes/create')
         def post(self):
             data = request.get_json()
 
@@ -209,6 +213,7 @@ def init_pass_routes(api):
     class UserPassHistoryWithTravellersResource(Resource):
         @api.response(200, 'Success', pass_history_with_travellers_model)
         @api.response(404, 'Resource not found', error_response_model_404)
+        @log_api_access('GET /passes/<user_id>/passes-history-all')
         def get(self, user_id):
             user = UserSensitiveInformation.query.get(user_id)
             if not user:
@@ -267,6 +272,7 @@ def init_pass_routes(api):
         @api.response(200, 'Pass deleted successfully', success_message_model)
         @api.response(400, 'Required fields missing', error_response_model_400)
         @api.response(404, 'User, pass not found, or pass does not belong to user', error_response_model_404)
+        @log_api_access('DELETE /passes/<user_id>/delete-pass')
         def delete(self, user_id):
             user = UserSensitiveInformation.query.get(user_id)
             if not user:
@@ -308,6 +314,7 @@ def init_pass_routes(api):
         @api.response(200, 'Pass updated successfully', pass_details_by_id_model)
         @api.response(400, 'Required fields missing or invalid date format', error_response_model_400)
         @api.response(404, 'Pass or traveller not found', error_response_model_404)
+        @log_api_access('PUT /passes/update')
         def put(self):
             """Update a pass with a new date and list of travellers by passport numbers."""
             data = request.get_json()
@@ -378,6 +385,7 @@ def init_pass_routes(api):
 
         @api.response(200, 'Success', pass_details_by_user_model)
         @api.response(404, 'User not found', error_response_model_404)
+        @log_api_access('GET /passes/<user_id>/details')
         def get(self, user_id):
             """Retrieve details of all passes created by a user, including pass date, expiry datetime, travellers, and passenger count."""
             user = UserSensitiveInformation.query.get(user_id)

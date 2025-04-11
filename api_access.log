@@ -1,0 +1,31 @@
+2025-04-11 17:27:04,586 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://172.20.10.3:5000
+2025-04-11 17:27:04,587 - INFO - [33mPress CTRL+C to quit[0m
+2025-04-11 17:27:04,599 - INFO -  * Restarting with watchdog (windowsapi)
+2025-04-11 17:27:05,208 - WARNING -  * Debugger is active!
+2025-04-11 17:27:05,218 - INFO -  * Debugger PIN: 104-093-061
+2025-04-11 17:27:19,966 - INFO - 127.0.0.1 - - [11/Apr/2025 17:27:19] "GET / HTTP/1.1" 200 -
+2025-04-11 17:27:20,495 - INFO - 127.0.0.1 - - [11/Apr/2025 17:27:20] "[36mGET /swaggerui/swagger-ui-bundle.js HTTP/1.1[0m" 304 -
+2025-04-11 17:27:20,495 - INFO - 127.0.0.1 - - [11/Apr/2025 17:27:20] "[36mGET /swaggerui/droid-sans.css HTTP/1.1[0m" 304 -
+2025-04-11 17:27:20,499 - INFO - 127.0.0.1 - - [11/Apr/2025 17:27:20] "[36mGET /swaggerui/swagger-ui.css HTTP/1.1[0m" 304 -
+2025-04-11 17:27:20,514 - INFO - 127.0.0.1 - - [11/Apr/2025 17:27:20] "[36mGET /swaggerui/swagger-ui-standalone-preset.js HTTP/1.1[0m" 304 -
+2025-04-11 17:27:20,760 - INFO - 127.0.0.1 - - [11/Apr/2025 17:27:20] "GET /swagger.json HTTP/1.1" 200 -
+2025-04-11 17:28:43,862 - INFO - API Access: GET /users/<user_id>/profile - Started at 2025-04-11 17:28:43
+2025-04-11 17:28:43,871 - INFO - API Access: GET /users/<user_id>/profile - Completed at 2025-04-11 17:28:43 - Duration: 0.01 seconds
+2025-04-11 17:28:43,872 - INFO - 127.0.0.1 - - [11/Apr/2025 17:28:43] "GET /users/1/profile HTTP/1.1" 200 -
+2025-04-11 21:14:04,307 - INFO -  * Detected change in 'C:\\Users\\user\\Downloads\\Before July 2024\\Desktop_move\\_Transfer\\26_March_Yash_Windows_Backup\\Desktop\\SUTD\\Important\\My Courses\\Term 7\\Capstone\\My Work\\License Plate Detection\\Server\\Server output\\mock_data.py', reloading
+2025-04-11 21:14:04,906 - INFO -  * Restarting with watchdog (windowsapi)
+2025-04-11 21:14:13,561 - WARNING -  * Debugger is active!
+2025-04-11 21:14:13,567 - INFO -  * Debugger PIN: 104-093-061
+2025-04-11 21:14:24,486 - INFO -  * Detected change in 'C:\\Users\\user\\Downloads\\Before July 2024\\Desktop_move\\_Transfer\\26_March_Yash_Windows_Backup\\Desktop\\SUTD\\Important\\My Courses\\Term 7\\Capstone\\My Work\\License Plate Detection\\Server\\Server output\\routes\\user_routes.py', reloading
+2025-04-11 21:14:24,487 - INFO -  * Detected change in 'C:\\Users\\user\\Downloads\\Before July 2024\\Desktop_move\\_Transfer\\26_March_Yash_Windows_Backup\\Desktop\\SUTD\\Important\\My Courses\\Term 7\\Capstone\\My Work\\License Plate Detection\\Server\\Server output\\routes\\user_routes.py', reloading
+2025-04-11 21:14:24,789 - INFO -  * Restarting with watchdog (windowsapi)
+2025-04-11 21:14:25,426 - WARNING -  * Debugger is active!
+2025-04-11 21:14:25,432 - INFO -  * Debugger PIN: 104-093-061
+2025-04-11 21:14:26,186 - INFO -  * Detected change in 'C:\\Users\\user\\Downloads\\Before July 2024\\Desktop_move\\_Transfer\\26_March_Yash_Windows_Backup\\Desktop\\SUTD\\Important\\My Courses\\Term 7\\Capstone\\My Work\\License Plate Detection\\Server\\Server output\\routes\\user_routes.py', reloading
+2025-04-11 21:14:26,186 - INFO -  * Detected change in 'C:\\Users\\user\\Downloads\\Before July 2024\\Desktop_move\\_Transfer\\26_March_Yash_Windows_Backup\\Desktop\\SUTD\\Important\\My Courses\\Term 7\\Capstone\\My Work\\License Plate Detection\\Server\\Server output\\routes\\user_routes.py', reloading
+2025-04-11 21:14:26,547 - INFO -  * Restarting with watchdog (windowsapi)
+2025-04-11 21:14:27,156 - WARNING -  * Debugger is active!
+2025-04-11 21:14:27,162 - INFO -  * Debugger PIN: 104-093-061

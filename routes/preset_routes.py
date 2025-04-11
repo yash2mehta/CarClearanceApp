@@ -15,6 +15,7 @@ from api_models import (
     update_preset_travellers_passport_model,
     traveller_model_with_user_id
 )
+from .api_logger import log_api_access
 
 def init_preset_routes(api):
     ns_preset = api.namespace('presets', description='Preset-related operations')
@@ -23,6 +24,7 @@ def init_preset_routes(api):
     class UserPresetsResource(Resource):
         @api.response(200, 'Success', preset_details_model)
         @api.response(404, 'Preset not found', error_response_model_404)
+        @log_api_access('GET /presets/<user_id>/preset-summary')
         def get(self, user_id):
             user = UserSensitiveInformation.query.get(user_id)
             if not user:
@@ -64,6 +66,7 @@ def init_preset_routes(api):
 
         @api.response(200, 'Success', retrieve_all_presets_with_count_model)
         @api.response(404, 'User not found', error_response_model_404)
+        @log_api_access('GET /presets/<user_id>/created-presets-with-users-additional')
         def get(self, user_id):
             user = UserSensitiveInformation.query.get(user_id)
             if not user:
@@ -126,6 +129,7 @@ def init_preset_routes(api):
     class UserCreatedPresetsWithUsersResource(Resource):
         @api.response(200, 'Success', retrieve_all_presets_for_user_model)
         @api.response(404, 'Preset not found', error_response_model_404)
+        @log_api_access('GET /presets/<user_id>/created-presets-with-users')
         def get(self, user_id):
             user = UserSensitiveInformation.query.get(user_id)
             if not user:
@@ -186,6 +190,7 @@ def init_preset_routes(api):
         @api.response(200, 'Preset deleted successfully', success_message_model)
         @api.response(400, 'Required fields missing', error_response_model_400)
         @api.response(404, 'User, preset not found, or preset does not belong to user', error_response_model_404)
+        @log_api_access('DELETE /presets/<user_id>/delete-preset')
         def delete(self, user_id):
             user = UserSensitiveInformation.query.get(user_id)
             if not user:
@@ -226,6 +231,7 @@ def init_preset_routes(api):
         @api.response(200, 'Success', preset_response_model)
         @api.response(400, 'Preset name or User ID not given in input', error_response_model_400)
         @api.response(404, 'Creator User ID/Passport number of one of the travellers not found', error_response_model_404)
+        @log_api_access('POST /presets/create')
         def post(self):
             data = request.get_json()
 
@@ -290,6 +296,7 @@ def init_preset_routes(api):
         @api.response(200, 'Preset travellers updated successfully', preset_response_model)
         @api.response(400, 'Required fields missing', error_response_model_400)
         @api.response(404, 'User, preset or traveller not found, or preset does not belong to user', error_response_model_404)
+        @log_api_access('PUT /presets/<user_id>/update-preset-travellers-passport')
         def put(self, user_id):
             user = UserSensitiveInformation.query.get(user_id)
             if not user:

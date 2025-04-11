@@ -2,6 +2,7 @@ from flask_restx import Resource
 from flask import request
 from db_instance import db
 from models import UserSensitiveInformation
+from datetime import datetime
 from api_models import (
     user_profile_model,
     user_profile_with_id_model,
@@ -12,6 +13,7 @@ from api_models import (
     name_by_passport_response_model,
     traveller_model
 )
+from .api_logger import log_api_access
 
 def init_user_routes(api):
     ns_user = api.namespace('users', description='User-related operations')
@@ -24,6 +26,7 @@ def init_user_routes(api):
         @api.response(200, 'Success', name_by_passport_response_model)
         @api.response(400, 'Missing passport number', error_response_model_400)
         @api.response(404, 'User or passport not found', error_response_model_404)
+        @log_api_access('POST /users/retrieve-name-by-passport')
         def post(self):
             """Retrieve first name, middle name, last name and full name by passport number."""
             data = request.get_json()
@@ -58,6 +61,7 @@ def init_user_routes(api):
         """Retrieve the profile of the user."""
         @api.response(200, 'User profile retrieved successfully', user_profile_model)
         @api.response(404, 'User not found', error_response_model_404)
+        @log_api_access('GET /users/<user_id>/profile')
         def get(self, user_id):
             """Get all the information of the user."""
             user = UserSensitiveInformation.query.get(user_id)
@@ -85,6 +89,7 @@ def init_user_routes(api):
         @api.response(200, 'Traveller updated successfully', traveller_model)
         @api.response(400, 'Invalid data format', error_response_model_400)
         @api.response(404, 'User ID not found', error_response_model_404)
+        @log_api_access('PUT /users/<user_id>/update-traveller')
         def put(self, user_id):
             data = request.get_json()
 
@@ -142,6 +147,7 @@ def init_user_routes(api):
         @api.response(200, 'User profile updated successfully', user_profile_with_id_model)
         @api.response(400, 'Invalid data format', error_response_model_400)
         @api.response(404, 'User ID not found', error_response_model_404)
+        @log_api_access('PUT /users/<user_id>/update-profile')
         def put(self, user_id):
             data = request.get_json()
 
