@@ -1,14 +1,16 @@
 from flask_restx import Resource
 from flask import request
-from ..db_instance import db
-from ..models import UserSensitiveInformation
-from ..api_models import (
+from db_instance import db
+from models import UserSensitiveInformation
+from api_models import (
     user_profile_model,
     user_profile_with_id_model,
     error_response_model_400,
     error_response_model_404,
+    success_message_model,
     name_by_passport_request_model,
-    name_by_passport_response_model
+    name_by_passport_response_model,
+    traveller_model
 )
 
 def init_user_routes(api):
@@ -75,51 +77,6 @@ def init_user_routes(api):
 
             return api.marshal(profile_data, user_profile_model), 200
 
-    @ns_user.route('/<int:user_id>/update-vehicle')
-    @api.param('user_id', 'The user identifier')
-    class UpdateVehicleResource(Resource):
-        @api.expect(vehicle_model)
-        @api.response(200, 'Vehicle updated successfully', vehicle_model)
-        @api.response(400, 'Invalid data format', error_response_model_400)
-        @api.response(404, 'User ID not found', error_response_model_404)
-        def put(self, user_id):
-            data = request.get_json()
-
-            user = UserSensitiveInformation.query.get(user_id)
-            if not user:
-                return {"error_code": 404, "message": "User not found"}, 404
-
-            try:
-                vehicle = Vehicle.query.filter_by(user_id=user_id).first()
-                if not vehicle:
-                    return {"error_code": 404, "message": "Vehicle not found"}, 404
-
-                if 'vehicle_number' in data and data['vehicle_number']:
-                    vehicle.vehicle_number = data['vehicle_number']
-
-                if 'vehicle_make' in data and data['vehicle_make']:
-                    vehicle.vehicle_make = data['vehicle_make']
-
-                if 'vehicle_model' in data and data['vehicle_model']:
-                    vehicle.vehicle_model = data['vehicle_model']
-
-                if 'vehicle_color' in data and data['vehicle_color']:
-                    vehicle.vehicle_color = data['vehicle_color']
-
-                db.session.commit()
-
-                response_data = {
-                    "vehicle_number": vehicle.vehicle_number,
-                    "vehicle_make": vehicle.vehicle_make,
-                    "vehicle_model": vehicle.vehicle_model,
-                    "vehicle_color": vehicle.vehicle_color
-                }
-
-                return api.marshal(response_data, vehicle_model), 200
-
-            except Exception as e:
-                db.session.rollback()
-                return {"error_code": 400, "message": f"Error updating vehicle: {str(e)}"}, 400
 
     @ns_user.route('/<int:user_id>/update-traveller')
     @api.param('user_id', 'The user identifier')

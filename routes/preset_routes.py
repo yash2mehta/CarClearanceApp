@@ -1,8 +1,8 @@
-from flask_restx import Resource
+from flask_restx import Resource, fields
 from flask import request
-from ..db_instance import db
-from ..models import UserSensitiveInformation, Preset, PresetTraveller
-from ..api_models import (
+from db_instance import db
+from models import UserSensitiveInformation, Preset, PresetTraveller
+from api_models import (
     preset_details_model,
     preset_response_model,
     error_response_model_400,
@@ -12,7 +12,8 @@ from ..api_models import (
     preset_with_users_model_2,
     retrieve_all_presets_for_user_model,
     delete_preset_model,
-    update_preset_travellers_passport_model
+    update_preset_travellers_passport_model,
+    traveller_model_with_user_id
 )
 
 def init_preset_routes(api):
@@ -360,4 +361,6 @@ def init_preset_routes(api):
             except Exception as e:
                 db.session.rollback()
                 return {"error_code": 400, "message": f"Error updating preset travellers: {str(e)}"}, 400
+
+    return ns_preset
 

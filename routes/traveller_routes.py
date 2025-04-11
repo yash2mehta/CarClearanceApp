@@ -1,21 +1,16 @@
 from flask_restx import Resource
 from flask import request
-from ..db_instance import db
-from ..models import Traveller, UserSensitiveInformation, UserTraveller
-from ..api_models import (
-    traveller_details_model,
-    traveller_response_model,
+from db_instance import db
+from models import UserSensitiveInformation, UserTraveller
+from api_models import (
     error_response_model_400,
     error_response_model_404,
     success_message_model,
-    traveller_with_passport_model,
-    retrieve_all_travellers_for_user_model,
-    delete_traveller_model,
-    update_traveller_passport_model,
-    traveller_model,
     user_travellers_model,
     batch_add_travellers_model,
-    batch_add_travellers_response_model
+    batch_add_travellers_response_model,
+    passport_number_model,
+    delete_traveller_by_passport_model
 )
 
 def init_traveller_routes(api):
@@ -109,7 +104,6 @@ def init_traveller_routes(api):
 
             return api.marshal(response, user_travellers_model), 201
 
-    return ns_traveller 
 
     @ns_traveller.route('/<int:user_id>/delete-traveller-by-passport')
     class DeleteTravellerByPassportResource(Resource):
@@ -215,4 +209,6 @@ def init_traveller_routes(api):
             except Exception as e:
                 db.session.rollback()
                 return {"error_code": 400, "message": f"Error processing travellers: {str(e)}"}, 400
+
+    return ns_traveller 
 

@@ -1,9 +1,9 @@
 from flask_restx import Resource
 from flask import request
 from datetime import datetime, timedelta
-from ..db_instance import db
-from ..models import UserSensitiveInformation, Pass, PassTraveller
-from ..api_models import (
+from db_instance import db
+from models import UserSensitiveInformation, Pass, PassTraveller
+from api_models import (
     pass_response_model,
     pass_response_model_2,
     pass_details_by_id_model,
@@ -136,9 +136,6 @@ def init_pass_routes(api):
 
             return api.marshal(response, pass_details_by_id_model), 200
 
-    return ns_pass
-
-
     @ns_pass.route('/create')
     class CreatePassResource(Resource):
         @api.expect(create_pass_model)
@@ -206,7 +203,7 @@ def init_pass_routes(api):
                 "travellers_added": travellers_added
             }
 
-        return api.marshal(response, pass_response_model_2), 200
+            return api.marshal(response, pass_response_model_2), 200
 
     @ns_pass.route('/<int:user_id>/passes-history-all')
     class UserPassHistoryWithTravellersResource(Resource):
@@ -435,5 +432,7 @@ def init_pass_routes(api):
             }
 
             return api.marshal(response, pass_details_by_user_model), 200
+
+    return ns_pass
 
             

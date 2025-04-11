@@ -1,13 +1,14 @@
 from flask_restx import Resource
 from flask import request
-from ..db_instance import db
-from ..models import UserSensitiveInformation, Vehicle, UserVehicle
-from ..api_models import (
+from db_instance import db
+from models import UserSensitiveInformation, Vehicle, UserVehicle
+from api_models import (
     add_vehicle_model,
     add_vehicle_model_result,
     all_vehicles_model,
     error_response_model_400,
     error_response_model_404,
+    delete_vehicle_model,
     delete_message_model
 )
 

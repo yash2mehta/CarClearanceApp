@@ -1,4 +1,5 @@
 from flask_restx import fields, Model
+from api_instance import api
 
 add_vehicle_model = api.model('AddVehicle', {
     'vehicle_number': fields.String(required=True, description="License plate number of the vehicle"),
