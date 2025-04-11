@@ -29,3 +29,38 @@
 2025-04-11 21:14:26,547 - INFO -  * Restarting with watchdog (windowsapi)
 2025-04-11 21:14:27,156 - WARNING -  * Debugger is active!
 2025-04-11 21:14:27,162 - INFO -  * Debugger PIN: 104-093-061
+2025-04-12 00:15:16,906 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.108:5000
+2025-04-12 00:15:16,907 - INFO - [33mPress CTRL+C to quit[0m
+2025-04-12 00:15:16,920 - INFO -  * Restarting with watchdog (windowsapi)
+2025-04-12 00:15:17,517 - WARNING -  * Debugger is active!
+2025-04-12 00:15:17,524 - INFO -  * Debugger PIN: 104-093-061
+2025-04-12 00:15:26,640 - INFO - 127.0.0.1 - - [12/Apr/2025 00:15:26] "GET / HTTP/1.1" 200 -
+2025-04-12 00:15:26,818 - INFO - 127.0.0.1 - - [12/Apr/2025 00:15:26] "[36mGET /swaggerui/droid-sans.css HTTP/1.1[0m" 304 -
+2025-04-12 00:15:26,829 - INFO - 127.0.0.1 - - [12/Apr/2025 00:15:26] "[36mGET /swaggerui/swagger-ui.css HTTP/1.1[0m" 304 -
+2025-04-12 00:15:26,894 - INFO - 127.0.0.1 - - [12/Apr/2025 00:15:26] "[36mGET /swaggerui/swagger-ui-bundle.js HTTP/1.1[0m" 304 -
+2025-04-12 00:15:27,052 - INFO - 127.0.0.1 - - [12/Apr/2025 00:15:27] "[36mGET /swaggerui/swagger-ui-standalone-preset.js HTTP/1.1[0m" 304 -
+2025-04-12 00:15:27,204 - INFO - 127.0.0.1 - - [12/Apr/2025 00:15:27] "GET /swagger.json HTTP/1.1" 200 -
+2025-04-12 00:15:38,906 - INFO - 127.0.0.1 - - [12/Apr/2025 00:15:38] "GET /db/show-tables HTTP/1.1" 200 -
+2025-04-12 00:16:56,321 - INFO -  * Detected change in 'C:\\Users\\user\\Downloads\\Before July 2024\\Desktop_move\\_Transfer\\26_March_Yash_Windows_Backup\\Desktop\\SUTD\\Important\\My Courses\\Term 7\\Capstone\\My Work\\License Plate Detection\\Server\\Server output\\routes\\db_view_routes.py', reloading
+2025-04-12 00:16:56,324 - INFO -  * Detected change in 'C:\\Users\\user\\Downloads\\Before July 2024\\Desktop_move\\_Transfer\\26_March_Yash_Windows_Backup\\Desktop\\SUTD\\Important\\My Courses\\Term 7\\Capstone\\My Work\\License Plate Detection\\Server\\Server output\\routes\\db_view_routes.py', reloading
+2025-04-12 00:16:56,325 - INFO -  * Detected change in 'C:\\Users\\user\\Downloads\\Before July 2024\\Desktop_move\\_Transfer\\26_March_Yash_Windows_Backup\\Desktop\\SUTD\\Important\\My Courses\\Term 7\\Capstone\\My Work\\License Plate Detection\\Server\\Server output\\routes\\db_view_routes.py', reloading
+2025-04-12 00:16:57,016 - INFO -  * Restarting with watchdog (windowsapi)
+2025-04-12 00:17:19,326 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.108:5000
+2025-04-12 00:17:19,327 - INFO - [33mPress CTRL+C to quit[0m
+2025-04-12 00:17:19,333 - INFO -  * Restarting with watchdog (windowsapi)
+2025-04-12 00:17:19,925 - WARNING -  * Debugger is active!
+2025-04-12 00:17:19,932 - INFO -  * Debugger PIN: 104-093-061
+2025-04-12 00:17:21,910 - INFO - 127.0.0.1 - - [12/Apr/2025 00:17:21] "GET / HTTP/1.1" 200 -
+2025-04-12 00:17:22,086 - INFO - 127.0.0.1 - - [12/Apr/2025 00:17:22] "[36mGET /swaggerui/droid-sans.css HTTP/1.1[0m" 304 -
+2025-04-12 00:17:22,093 - INFO - 127.0.0.1 - - [12/Apr/2025 00:17:22] "[36mGET /swaggerui/swagger-ui-bundle.js HTTP/1.1[0m" 304 -
+2025-04-12 00:17:22,097 - INFO - 127.0.0.1 - - [12/Apr/2025 00:17:22] "[36mGET /swaggerui/swagger-ui-standalone-preset.js HTTP/1.1[0m" 304 -
+2025-04-12 00:17:22,100 - INFO - 127.0.0.1 - - [12/Apr/2025 00:17:22] "[36mGET /swaggerui/swagger-ui.css HTTP/1.1[0m" 304 -
+2025-04-12 00:17:22,293 - INFO - 127.0.0.1 - - [12/Apr/2025 00:17:22] "GET /swagger.json HTTP/1.1" 200 -
+2025-04-12 00:17:22,296 - INFO - 127.0.0.1 - - [12/Apr/2025 00:17:22] "[36mGET /swaggerui/favicon-32x32.png HTTP/1.1[0m" 304 -
+2025-04-12 00:17:26,660 - INFO - 127.0.0.1 - - [12/Apr/2025 00:17:26] "GET /db/show-tables HTTP/1.1" 200 -

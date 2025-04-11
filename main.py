@@ -8,6 +8,7 @@ from routes.user_routes import init_user_routes
 from routes.preset_routes import init_preset_routes
 from routes.pass_routes import init_pass_routes
 from routes.traveller_routes import init_traveller_routes
+from routes.db_view_routes import init_db_view_routes
 
 # Initialize routes
 init_vehicle_routes(api)
@@ -15,6 +16,7 @@ init_user_routes(api)
 init_preset_routes(api)
 init_pass_routes(api)
 init_traveller_routes(api)
+init_db_view_routes(app)
 
 if __name__ == '__main__':
     with app.app_context():
