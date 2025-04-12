@@ -93,6 +93,16 @@ In addition to the API endpoints, this system uses SQLite as its database.
 - The system uses SQLite, so no additional database server is required
 - Mock data is automatically inserted on server start for testing purposes
 
+## 6. Documentation
+
+For detailed information about the system, please refer to the following documentation:
+
+### API Documentation
+For a complete list of API endpoints, their methods, and usage, please refer to [API Documentation](API_DOCUMENTATION.md).
+
+### Database Schema
+For detailed information about the database tables, their structure, and relationships, please refer to [Database Schema Documentation](DATABASE_SCHEMA.md).
+
 ---
 
 *This guide provides a comprehensive overview of the Web Scraper system designed for Vaxtor. For additional support or specific issues, please contact the development team.* 
