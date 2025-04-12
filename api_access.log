@@ -64,3 +64,40 @@
 2025-04-12 00:17:22,293 - INFO - 127.0.0.1 - - [12/Apr/2025 00:17:22] "GET /swagger.json HTTP/1.1" 200 -
 2025-04-12 00:17:22,296 - INFO - 127.0.0.1 - - [12/Apr/2025 00:17:22] "[36mGET /swaggerui/favicon-32x32.png HTTP/1.1[0m" 304 -
 2025-04-12 00:17:26,660 - INFO - 127.0.0.1 - - [12/Apr/2025 00:17:26] "GET /db/show-tables HTTP/1.1" 200 -
+2025-04-13 05:44:07,347 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.1.99.40:5000
+2025-04-13 05:44:07,347 - INFO - [33mPress CTRL+C to quit[0m
+2025-04-13 05:44:07,517 - INFO -  * Restarting with watchdog (windowsapi)
+2025-04-13 05:44:08,115 - WARNING -  * Debugger is active!
+2025-04-13 05:44:08,124 - INFO -  * Debugger PIN: 104-093-061
+2025-04-13 05:44:13,728 - INFO - 127.0.0.1 - - [13/Apr/2025 05:44:13] "GET / HTTP/1.1" 200 -
+2025-04-13 05:44:13,889 - INFO - 127.0.0.1 - - [13/Apr/2025 05:44:13] "[36mGET /swaggerui/droid-sans.css HTTP/1.1[0m" 304 -
+2025-04-13 05:44:13,893 - INFO - 127.0.0.1 - - [13/Apr/2025 05:44:13] "[36mGET /swaggerui/swagger-ui.css HTTP/1.1[0m" 304 -
+2025-04-13 05:44:13,920 - INFO - 127.0.0.1 - - [13/Apr/2025 05:44:13] "[36mGET /swaggerui/swagger-ui-bundle.js HTTP/1.1[0m" 304 -
+2025-04-13 05:44:14,098 - INFO - 127.0.0.1 - - [13/Apr/2025 05:44:14] "[36mGET /swaggerui/swagger-ui-standalone-preset.js HTTP/1.1[0m" 304 -
+2025-04-13 05:44:14,214 - INFO - 127.0.0.1 - - [13/Apr/2025 05:44:14] "GET /swagger.json HTTP/1.1" 200 -
+2025-04-13 06:01:26,783 - INFO - 127.0.0.1 - - [13/Apr/2025 06:01:26] "[33mGET /show-tables HTTP/1.1[0m" 404 -
+2025-04-13 06:01:28,255 - INFO - 127.0.0.1 - - [13/Apr/2025 06:01:28] "[33mGET /show-tables HTTP/1.1[0m" 404 -
+2025-04-13 06:01:28,345 - INFO - 127.0.0.1 - - [13/Apr/2025 06:01:28] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2025-04-13 06:01:32,194 - INFO - 127.0.0.1 - - [13/Apr/2025 06:01:32] "GET /db/show-tables HTTP/1.1" 200 -
+2025-04-13 06:02:44,879 - INFO -  * Detected change in 'C:\\Users\\user\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\datetime.py', reloading
+2025-04-13 06:02:45,003 - INFO -  * Detected change in 'C:\\Users\\user\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\hashlib.py', reloading
+2025-04-13 06:02:45,704 - INFO -  * Restarting with watchdog (windowsapi)
+2025-04-13 06:02:46,643 - WARNING -  * Debugger is active!
+2025-04-13 06:02:46,649 - INFO -  * Debugger PIN: 104-093-061
+2025-04-13 06:03:05,957 - INFO -  * Detected change in 'C:\\Users\\user\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\site-packages\\flask_sqlalchemy\\__init__.py', reloading
+2025-04-13 06:03:05,963 - INFO -  * Detected change in 'C:\\Users\\user\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\site-packages\\flask_sqlalchemy\\extension.py', reloading
+2025-04-13 06:03:06,816 - INFO -  * Restarting with watchdog (windowsapi)
+2025-04-13 06:03:07,385 - WARNING -  * Debugger is active!
+2025-04-13 06:03:07,391 - INFO -  * Debugger PIN: 104-093-061
+2025-04-13 06:03:10,208 - INFO -  * Detected change in 'C:\\Users\\user\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\site-packages\\flask\\__init__.py', reloading
+2025-04-13 06:03:10,211 - INFO -  * Detected change in 'C:\\Users\\user\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\site-packages\\flask\\app.py', reloading
+2025-04-13 06:03:10,256 - INFO -  * Detected change in 'C:\\Users\\user\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\site-packages\\sqlalchemy\\__init__.py', reloading
+2025-04-13 06:03:10,264 - INFO -  * Detected change in 'C:\\Users\\user\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\site-packages\\sqlalchemy\\schema.py', reloading
+2025-04-13 06:03:10,268 - INFO -  * Detected change in 'C:\\Users\\user\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\site-packages\\sqlalchemy\\sql\\schema.py', reloading
+2025-04-13 06:03:10,507 - INFO -  * Restarting with watchdog (windowsapi)
+2025-04-13 06:03:11,077 - WARNING -  * Debugger is active!
+2025-04-13 06:03:11,083 - INFO -  * Debugger PIN: 104-093-061
+2025-04-13 06:27:04,808 - INFO - 127.0.0.1 - - [13/Apr/2025 06:27:04] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
